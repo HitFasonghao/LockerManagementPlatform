@@ -1,6 +1,6 @@
 目录说明
 
-```js
+```java
 |-- .vscode                             // VS Code 编辑器配置
 |   |-- extensions.json                 // 推荐安装的插件列表
 |   |-- settings.json                   // 项目级别的编辑器设置
