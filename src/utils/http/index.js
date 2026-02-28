@@ -1,25 +1,16 @@
-/**********************************
- * @FilePath: index.js
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/04 22:46:28
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import axios from 'axios'
 import { setupInterceptors } from './interceptors'
 
 export function createAxios(options = {}) {
   const defaultOptions = {
-    baseURL: import.meta.env.VITE_AXIOS_BASE_URL,
-    timeout: 12000,
+    baseURL: import.meta.env.VITE_AXIOS_BASE_URL, // 从环境变量读取url前缀
+    timeout: 12000, // 请求超时时间
   }
   const service = axios.create({
     ...defaultOptions,
     ...options,
   })
-  setupInterceptors(service)
+  setupInterceptors(service)// 设置请求和响应拦截器
   return service
 }
 

@@ -1,36 +1,8 @@
-/**********************************
- * @FilePath: helpers.js
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/04 22:46:22
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { useAuthStore } from '@/store'
 
 let isConfirming = false
 
-function handleAuthExpired(content, needTip) {
-  if (isConfirming || !needTip)
-    return
-  isConfirming = true
-  $dialog.confirm({
-    title: '提示',
-    type: 'info',
-    content,
-    confirm() {
-      useAuthStore().logout()
-      window.$message?.success('已退出登录')
-      isConfirming = false
-    },
-    cancel() {
-      isConfirming = false
-    },
-  })
-  return false
-}
-
+// 业务层面的错误处理，根据code返回处理后的message
 export function resolveResError(code, message, needTip = true) {
   switch (code) {
     case 401:
@@ -53,4 +25,26 @@ export function resolveResError(code, message, needTip = true) {
   }
   needTip && window.$message?.error(message)
   return message
+}
+
+// TODO: 后续需要修改此处的逻辑，默认重新登录，不再弹出确认框
+// 处理登录过期的情况，弹出确认框询问用户是否重新登录
+function handleAuthExpired(content, needTip) {
+  if (isConfirming || !needTip)
+    return
+  isConfirming = true
+  $dialog.confirm({
+    title: '提示',
+    type: 'info',
+    content,
+    confirm() {
+      useAuthStore().logout()
+      window.$message?.success('已退出登录')
+      isConfirming = false
+    },
+    cancel() {
+      isConfirming = false
+    },
+  })
+  return false
 }

@@ -1,102 +1,121 @@
-<p align="center">
-  <a href="https://github.com/zclzone/vue-naive-admin">
-    <img alt="Vue Naive Admin Logo" width="200" src="./src/assets/images/logo.png">
-  </a>
-</p>
-<p align="center">
-  <a href="./LICENSE"><img alt="MIT License" src="https://badgen.net/github/license/zclzone/vue-naive-admin"/></a>
-  <a href="https://gitcode.com/zclzone/vue-naive-admin"><img alt="GitCode" src="https://gitcode.com/zclzone/vue-naive-admin/star/badge.svg
-"/></a>
-</p>
+目录说明
 
----
-
-<a href="https://hellogithub.com/repository/54f19ba1f9ae4238b3cbd111f3c428b0" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=54f19ba1f9ae4238b3cbd111f3c428b0&claim_uid=jXGayRdJZScqMNr" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-
-> [!Tip]
-> 我们提供Web（PC+H5+小程序）的技术支持服务及定制开发，不限前后端，详细需求可联系作者，微信: isme-admin，邮箱: zclzone@outlook.com
-
-## 简介
-
-Vue Naive Admin 是一款极简风格的后台管理模板，包含前后端解决方案，前端使用 Vite + Vue3 + Pinia + Unocss，后端使用 Nestjs + TypeOrm + MySql，简单易用，赏心悦目，历经十几次重构和细节打磨，诚意满满！！
-
-## 设计理念
-
-Vue Naive Admin 2022年2月开始开源，从 1.0 到现在的 2.0，一直秉持着`简单即正义`的理念，旨在帮助中小企业、在校大学生及个人开发者快速上手开发后台管理项目，为了降低使用者的学习成本，没有使用看似主流的 TypeScript（前端），这也使得 Vue Naive Admin 成为了市面上少有的 `使用 JavaScript 的 Vue3 后台管理模板`，而且还算优秀，得到了大量朋友的认可和喜爱。
-
-## 特性
-
-- 🆒 使用 **Vue3** 主流最新技术栈: `Vite + Vue3 + Pinia`
-- 🍇 使用 **原子CSS**框架: `Unocss`，优雅、轻量、易用
-- 🍍 集成 `Pinia` 状态管理，支持状态持久化
-- 🤹 使用主流的 `iconify + unocss` 图标方案，支持自定义图标，支持动态渲染
-- 🎨 使用 Naive UI，`极致简洁的代码风格和清爽的页面设计`，审美在线，主题轻松定制
-- 👏 先进且易于理解的文件结构设计，多个模块之间**零耦合**，单个业务模块删除不影响其他模块
-- 🚀 `扁平化路由`设计，每一个组件都可以是一个页面，告别多级路由 `KeepAlive` 难实现问题
-- 🍒 `基于权限动态生成路由`，无需额外定义路由，`403和404页面可区分`，而不是无权限也跳404
-- 🔐 基于Redis集成 `无感刷新`，用户登录态可控，安全与体验缺一不可
-- ✨ 基于 Naive UI 封装 `message` 全局工具方法，支持批量提醒，支持跨页面单例模式
-- ⚡️ 基于 Naive UI 封装常用的业务组件，包含`Page` 组件、`CRUD` 表格组件及 `Modal`组件等，简单易用，减少大量重复性工作
-
-## 极致的性能
-
-![](https://docs.isme.top/Public/Uploads/2023-11-18/6558568b2b476.png)
-![](https://docs.isme.top/Public/Uploads/2023-11-18/655853caa9ce8.png)
-
-## 2.0 和 1.0 区别
-
-- 2.0 是基于 1.0 风格从 0 到 1 重新设计的，所以 2.0 看似跟 1.0 很像，但其实代码机构差别还挺大的。
-- 1.0 只提供前端，后端使用 Mock 模拟的，而 2.0 是全栈版，提供真实的后端接口。
-- 2.0 虽然版本高于 1.0，但复杂度却远低于 1.0，虽然 1.0 也很简单。
-- 2.0 的灵活度远高于 1.0，只要你愿意，你可以为每个页面单独定制一个 layout
-
-[体验1.0 | template.isme.top](https://template.isme.top)
-
-[体验2.0 | admin.isme.top](https://admin.isme.top)
-
-## Nestjs 后端
-
-Vue Naive Admin 提供一套后端代码，技术栈使用 Nestjs + TypeOrm + MySql，内置 JWT、RABC及模板所需的一些基础接口。
-
-- 源码-github: [isme-nest-serve | github](https://github.com/zclzone/isme-nest-serve)
-- 源码-gitee: [isme-nest-serve | gitee](https://gitee.com/isme-admin/isme-nest-serve)
-- 源码-gitcode: [isme-nest-serve | gitcode](https://gitcode.com/zclzone/isme-nest-serve)
-
-## 文档
-
-- 项目文档: [docs | vue-naive-admin](https://isme.top)
-- 接口文档: [apidoc | isme-nest-serve](https://apifox.com/apidoc/shared-ff4a4d32-c0d1-4caf-b0ee-6abc130f734a)
-
-> 注：有个比较常见的问题，就是如何添加菜单和修改菜单，由于项目是由后端控制菜单资源的，所以需要对接后端后在资源管理功能对菜单进行增删改，然后在角色管理功能给对应角色进行授权。具体如何对接后端，请参考 [项目文档](https://isme.top)。当然，可能有些菜单你不想通过权限控制，那么你可以在 `/src/settings.js` 文件添加 basePermissions，只需对齐菜单资源的结构即可，结构可以参照 [接口文档](https://apifox.com/apidoc/shared-ff4a4d32-c0d1-4caf-b0ee-6abc130f734a/api-134536978)。
-
-## 使用这个模板开始你的项目
-
-[使用这个模板创建Github仓库](https://github.com/zclzone/vue-naive-admin/generate).
-
-或者使用 `degit` 克隆此仓库，这样将没有任何历史提交记录：
-
-```cmd
-npx degit zclzone/vue-naive-admin
+```js
+|-- .vscode                             // VS Code 编辑器配置
+|   |-- extensions.json                 // 推荐安装的插件列表
+|   |-- settings.json                   // 项目级别的编辑器设置
+|-- build                               // 构建脚本与配置目录
+|   |-- plugin-isme                     // 自定义构建插件
+|   |   |-- icons.js                    // 获取图标名称列表
+|   |   |-- page-paths.js               // 获取.vue文件路径列表
+|   |   |-- index.js
+|   |-- index.js                        // 提供两个方法供icon.js和page-paths.js使用
+|-- node_modules                        // 依赖包目录 (通常无需修改)
+|-- public                              // 静态资源目录 (打包时直接复制)
+|-- src                                 // 源代码目录 (核心开发区域)
+|   |-- api                             // API 接口管理
+|   |   |-- index.js                    // API 统一配置和导出（写了前端需要用到的所有后端接口）
+|   |-- assets                          // 静态资源目录
+|   |   |-- icons                       // 图标资源
+|   |   |   |-- feather
+|   |   |   |-- isme
+|   |   |   |-- dynamic-icons.js        // 动态图标加载配置
+|   |   |-- images                      // 图片资源
+|   |-- components                      // 公共组件目录
+|   |   |-- common                      // 通用基础组件
+|   |   |   |-- AppCard.vue             // 应用卡片组件
+|   |   |   |-- AppPage.vue             // 应用页面容器组件
+|   |   |   |-- CommonPage.vue          // 通用页面布局组件
+|   |   |   |-- LayoutSetting.vue       // 页面右侧中间，布局设置组件
+|   |   |   |-- TheFooter.vue           // 页脚组件
+|   |   |   |-- TheLogo.vue             // 页面左上角，Logo（HIT）
+|   |   |   |-- ThemeSetting.vue        // 顶栏中，主题色设置组件
+|   |   |   |-- ToggleTheme.vue         // 顶栏中，主题切换组件
+|   |   |   |-- index.js
+|   |   |-- me
+|   |   |   |-- crud
+|   |   |   |   |-- index.vue           // 搜索+表格页面组件
+|   |   |   |   |-- QueryItem.vue       // 查询项组件
+|   |   |   |-- modal                   // 弹窗相关组件
+|   |   |   |   |-- index.vue           // 弹窗组件
+|   |   |   |-- utils.js                // 弹窗拖拽函数（服务index.vue）
+|   |   |   |-- index.js
+|   |   |-- index.js
+|   |-- composables                     // 组合式函数 (Hooks)
+|   |   |-- index.js
+|   |   |-- useAliveData.js             // 数据保活函数
+|   |   |-- useCrud.js                  // CRUD 逻辑封装函数
+|   |   |-- useForm.js                  // 表单逻辑封装 Hook
+|   |   |-- useModal.js                 // 弹窗逻辑封装 Hook
+|   |-- directives
+|   |   |-- index.js                    // 按钮级权限控制工具
+|   |-- layouts                         // 布局组件
+|   |   |-- components                  // 布局内部组件
+|   |   |-- empty                       // 空白布局
+|   |   |-- full                        // 全屏布局
+|   |   |-- normal                      // 标准布局
+|   |   |-- simple                      // 简洁布局
+|   |-- router                          // 路由配置
+|   |   |-- guards                      // 路由守卫
+|   |   |   |-- index-loading-guard.js  // 加载状态守卫
+|   |   |   |-- page-title-guard.js     // 页面标题守卫
+|   |   |   |-- permission-guard.js     // 权限验证守卫
+|   |   |   |-- tab-guard.js            // Tab 标签页守卫
+|   |   |-- basic-routes.js             // 基础路由配置
+|   |   |-- index.js                    // 路由入口文件
+|   |-- store                           // 状态管理 (Pinia/Vuex)
+|   |   |-- modules                     // 模块化 store
+|   |   |   |-- app.js                  // 应用全局状态
+|   |   |   |-- auth.js                 // 认证授权状态
+|   |   |   |-- index.js                // modules 统一导出
+|   |   |   |-- permission.js           // 权限状态
+|   |   |   |-- router.js               // 路由状态
+|   |   |   |-- tab.js                  // Tab 标签页状态
+|   |   |   |-- user.js                 // 用户信息状态
+|   |   |-- helper.js                   // Store 辅助函数
+|   |   |-- index.js                    // Store 入口文件
+|   |-- styles                          // 全局样式
+|   |   |-- global.css                  // 全局样式文件
+|   |   |-- reset.css                   // 样式重置文件
+|   |-- utils                           // 工具函数库
+|   |   |-- http                        // HTTP 请求封装（为/api/index.js服务）
+|   |   |   |-- helplers.js             // 业务失败时，根据code封装不同的错误信息
+|   |   |   |-- interceptors.js         // 实现拦截器逻辑（请求和响应在成功和失败时的处理）
+|   |   |   |-- index.js                // 配置Axios对象（url前缀、超时时间、设置请求和响应拦截器）
+|   |   |-- storage                     // 本地存储封装
+|   |   |   |--
+|   |   |   |--
+|   |   |-- common.js                   // 通用工具函数
+|   |   |-- index.js                    // 工具函数统一导出
+|   |   |-- js.js                       // JS 相关工具
+|   |   |-- naiveTools.js               // Naive UI 相关工具
+|   |-- views                           // 页面视图组件
+|   |   |-- base                        // 基础页面
+|   |   |   |-- demo_upload             // 上传演示页面
+|   |   |-- error-page                  // 错误页面
+|   |   |   |-- 403.vue                 // 403 禁止访问页面
+|   |   |   |-- 404.vue                 // 404 未找到页面
+|   |   |-- home                        // 首页
+|   |   |-- iframe                      // 内嵌页面
+|   |   |-- login                       // 登录页
+|   |   |-- pms                         // 权限管理系统页面
+|   |   |-- profile                     // 个人中心页面
+|   |-- App.vue                         // 根组件
+|   |-- main.js                         // 应用入口文件
+|-- .editorconfig                       // 编辑器统一风格配置
+|-- .env                                // 全局环境变量
+|-- .env.development                    // 开发环境变量
+|-- .env.production                     // 生产环境变量
+|-- .gitignore                          // Git 忽略文件配置
+|-- .npmrc                              // NPM 包管理器配置
+|-- eslint.config.js                    // ESLint 代码检查配置
+|-- index.html                          // HTML 入口模板
+|-- jsconfig.json                       // JS 项目配置文件 (用于路径别名等)
+|-- LICENSE                             // 开源许可证文件
+|-- package-lock.json                   // 依赖版本锁定文件 (NPM)
+|-- package.json                        // 项目元数据与依赖管理
+|-- pnpm-lock.yaml                      // 依赖版本锁定文件 (PNPM)
+|-- README.md                           // 项目说明文档
+|-- uno.config.js                       // UnoCSS 原子化 CSS 配置
+|-- vite.config.js                      // Vite 构建工具配置文件
 ```
-
-## 鸣谢
-
-本项目开发测试及运行环境由 [野草云](https://my.yecaoyun.com/aff.php?aff=3162) 提供支持。
-
-## 版权说明
-
-本项目使用 `MIT协议`，默认授权给任何人，被授权人可免费地无限制的使用、复制、修改、合并、发布、发行、再许可、售卖本软件拷贝、并有权向被供应人授予同等的权利，但必须满足以下条件:
-
-- 复制、修改和发行本项目代码需包含原作者的版权及许可信息，包括但不限于文件头注释、协议等
-
-简单来说，作者只想保留版权，没有任何其他限制。
-
-## 其他已对接本项目的后端项目
-
-- [isme-java-serve](https://github.com/DHBin/isme-java-serve): 一个轻量级的Java后端服务，基于SpringBoot、MybatisPlus、SaToken、MapStruct等实现，已对接 Vue Naive Admin 2.0。
-- [naive-admin-go](https://github.com/ituserxxx/naive-admin-go): 一个 Go 后端服务，基于 gin、gorm、mysql、jwt和session，已对接 Vue Naive Admin 2.0。
-- [isme-java](https://github.com/AllenDengMs/isme-java): 一个轻量且完成度高的Java后端服务，基于Springboot 3 + JDK21，层次结构严谨，注释齐全，避免过度封装，代码可读性度高，依赖最简化，上手成本低，已集成 账号管理、权限管理、API鉴权、消息国际化等功能。
-
-## 联系作者 or 进交流群
-
-[https://www.isme.top/contact.html](https://www.isme.top/contact.html)

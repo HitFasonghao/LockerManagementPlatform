@@ -1,22 +1,10 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2024/01/13 17:41:26
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
-// 获取元素的CSS样式
-function getCss(element, key) {
-  return element.currentStyle
-    ? element.currentStyle[key]
-    : window.getComputedStyle(element, null)[key]
-}
-
-// 初始化拖拽
+// 拖拽
+// @param {HTMLElement} bar - 触发拖动的元素，通常是模态框的标题栏
+// @param {HTMLElement} box - 被拖动的元素，通常是模态框的容器
 export function initDrag(bar, box) {
   if (!bar || !box)
-    return
+    return // 不存在，直接返回
+
   const params = {
     left: 0,
     top: 0,
@@ -25,6 +13,7 @@ export function initDrag(bar, box) {
     flag: false,
   }
 
+  // 获取元素的初始left和top值
   if (getCss(box, 'left') !== 'auto') {
     params.left = getCss(box, 'left')
   }
@@ -41,6 +30,7 @@ export function initDrag(bar, box) {
     params.currentX = e.clientX // 鼠标当前位置的X坐标
     params.currentY = e.clientY // 鼠标当前位置的Y坐标
   }
+  // 鼠标松开事件处理函数
   document.onmouseup = function () {
     params.flag = false // 设置拖拽标志为false
     if (getCss(box, 'left') !== 'auto') {
@@ -50,7 +40,9 @@ export function initDrag(bar, box) {
       params.top = getCss(box, 'top')
     }
   }
+  // 鼠标移动事件处理函数
   document.onmousemove = function (e) {
+    // 如果鼠标事件的目标不是触发拖动的元素，并且拖动标志为false，直接返回
     if (e.target !== bar && !params.flag)
       return
 
@@ -69,4 +61,11 @@ export function initDrag(bar, box) {
       box.style.top = `${top}px`
     }
   }
+}
+
+// 获取元素的CSS样式
+function getCss(element, key) {
+  return element.currentStyle
+    ? element.currentStyle[key]
+    : window.getComputedStyle(element, null)[key]
 }
