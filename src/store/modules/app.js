@@ -1,11 +1,3 @@
-/**********************************
- * @Author: Ronnie Zhang
- * @LastEditor: Ronnie Zhang
- * @LastEditTime: 2023/12/05 21:25:31
- * @Email: zclzone@outlook.com
- * Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- **********************************/
-
 import { generate, getRgbStr } from '@arco-design/color'
 import { useDark } from '@vueuse/core'
 import { defineStore } from 'pinia'

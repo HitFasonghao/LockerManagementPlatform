@@ -55,43 +55,44 @@
 |   |   |-- full                        // 全屏布局
 |   |   |-- normal                      // 标准布局
 |   |   |-- simple                      // 简洁布局
-|   |-- router                          // 路由配置
-|   |   |-- guards                      // 路由守卫
-|   |   |   |-- index-loading-guard.js  // 加载状态守卫
+|   |-- router
+|   |   |-- guards
+|   |   |   |-- index.js                // 把其他四个守卫合成一个配置方法
+|   |   |   |-- page-loading-guard.js   // 加载状态守卫
 |   |   |   |-- page-title-guard.js     // 页面标题守卫
-|   |   |   |-- permission-guard.js     // 权限验证守卫
+|   |   |   |-- permission-guard.js     // 权限验证守卫（重要）
 |   |   |   |-- tab-guard.js            // Tab 标签页守卫
 |   |   |-- basic-routes.js             // 基础路由配置
-|   |   |-- index.js                    // 路由入口文件
+|   |   |-- index.js                    // 提供方法，供其他模块（main.js）配置路由使用
 |   |-- store                           // 状态管理 (Pinia/Vuex)
-|   |   |-- modules                     // 模块化 store
+|   |   |-- modules
 |   |   |   |-- app.js                  // 应用全局状态
 |   |   |   |-- auth.js                 // 认证授权状态
-|   |   |   |-- index.js                // modules 统一导出
+|   |   |   |-- index.js
 |   |   |   |-- permission.js           // 权限状态
 |   |   |   |-- router.js               // 路由状态
 |   |   |   |-- tab.js                  // Tab 标签页状态
 |   |   |   |-- user.js                 // 用户信息状态
-|   |   |-- helper.js                   // Store 辅助函数
+|   |   |-- helper.js                   // 辅助函数（获取用户信息，获取角色权限）
 |   |   |-- index.js                    // Store 入口文件
 |   |-- styles                          // 全局样式
-|   |   |-- global.css                  // 全局样式文件
-|   |   |-- reset.css                   // 样式重置文件
+|   |   |-- global.css
+|   |   |-- reset.css
 |   |-- utils                           // 工具函数库
-|   |   |-- http                        // HTTP 请求封装（为/api/index.js服务）
+|   |   |-- http
 |   |   |   |-- helplers.js             // 业务失败时，根据code封装不同的错误信息
 |   |   |   |-- interceptors.js         // 实现拦截器逻辑（请求和响应在成功和失败时的处理）
 |   |   |   |-- index.js                // 配置Axios对象（url前缀、超时时间、设置请求和响应拦截器）
-|   |   |-- storage                     // 本地存储封装
-|   |   |   |--
-|   |   |   |--
+|   |   |-- storage
+|   |   |   |-- index.js                // 封装本地存储和会话存储的工厂函数，并导出两个单例对象
+|   |   |   |-- storage.js              // 定义createStorage的工厂函数
 |   |   |-- common.js                   // 通用工具函数
-|   |   |-- index.js                    // 工具函数统一导出
-|   |   |-- js.js                       // JS 相关工具
-|   |   |-- naiveTools.js               // Naive UI 相关工具
+|   |   |-- index.js
+|   |   |-- js.js                       // JS 相关工具函数
+|   |   |-- naiveTools.js               // Naive UI 相关工具函数
 |   |-- views                           // 页面视图组件
-|   |   |-- base                        // 基础页面
-|   |   |   |-- demo_upload             // 上传演示页面
+|   |   |-- base                        // 基础功能页面
+|   |   |-- demo_upload                 // 图片上传页面
 |   |   |-- error-page                  // 错误页面
 |   |   |   |-- 403.vue                 // 403 禁止访问页面
 |   |   |   |-- 404.vue                 // 404 未找到页面
@@ -102,6 +103,7 @@
 |   |   |-- profile                     // 个人中心页面
 |   |-- App.vue                         // 根组件
 |   |-- main.js                         // 应用入口文件
+|   |-- settings.js                     // 配置文件（各种常量）
 |-- .editorconfig                       // 编辑器统一风格配置
 |-- .env                                // 全局环境变量
 |-- .env.development                    // 开发环境变量
@@ -111,7 +113,6 @@
 |-- eslint.config.js                    // ESLint 代码检查配置
 |-- index.html                          // HTML 入口模板
 |-- jsconfig.json                       // JS 项目配置文件 (用于路径别名等)
-|-- LICENSE                             // 开源许可证文件
 |-- package-lock.json                   // 依赖版本锁定文件 (NPM)
 |-- package.json                        // 项目元数据与依赖管理
 |-- pnpm-lock.yaml                      // 依赖版本锁定文件 (PNPM)

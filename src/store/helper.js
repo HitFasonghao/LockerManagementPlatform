@@ -2,6 +2,7 @@ import { cloneDeep } from 'lodash-es'
 import api from '@/api'
 import { basePermissions } from '@/settings'
 
+// TODO:用户信息待修改
 export async function getUserInfo() {
   const res = await api.getUser()
   const { id, username, profile, roles, currentRole } = res.data || {}
