@@ -7,9 +7,6 @@ export function resolveResError(code, message, needTip = true) {
   switch (code) {
     case 401:
       return handleAuthExpired('登录已过期，是否重新登录？', needTip)
-    case 11007:
-    case 11008:
-      return handleAuthExpired(`${message}，是否重新登录？`, needTip)
     case 403:
       message = '请求被拒绝'
       break

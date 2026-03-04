@@ -6,7 +6,7 @@ export const useAuthStore = defineStore('auth', {
     accessToken: undefined,
   }),
   actions: {
-    setToken({ accessToken }) {
+    setToken(accessToken) {
       this.accessToken = accessToken
     },
     resetToken() {

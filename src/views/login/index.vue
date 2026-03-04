@@ -69,15 +69,17 @@
               <template #prefix>
                 <i class="i-fe:key mr-12 opacity-20" />
               </template>
+              <template #suffix>
+                <img
+                  v-if="captchaUrl"
+                  :src="captchaUrl"
+                  alt="验证码"
+                  height="40"
+                  class="ml-12 w-80 cursor-pointer"
+                  @click="initCaptcha"
+                >
+              </template>
             </n-input>
-            <img
-              v-if="captchaUrl"
-              :src="captchaUrl"
-              alt="验证码"
-              height="40"
-              class="ml-12 w-80 cursor-pointer"
-              @click="initCaptcha"
-            >
           </div>
         </template>
 
@@ -162,6 +164,7 @@ const accountInfo = ref({
   username: '',
   password: '',
   captcha: '',
+  captchaId: '',
 })
 
 const smsInfo = ref({
@@ -170,10 +173,21 @@ const smsInfo = ref({
 })
 
 const captchaUrl = ref('')// 验证码图片地址
-// 获取验证码地址函数，节流函数限制调用频率为500ms
-const initCaptcha = throttle(() => {
-  captchaUrl.value = `${import.meta.env.VITE_AXIOS_BASE_URL}/auth/captcha?${Date.now()}`
-}, 500)
+
+// 获取图形验证码，节流函数限制调用频率为500ms
+const initCaptcha = throttle(async () => {
+  try {
+    const { data } = await api.getCaptcha()
+    accountInfo.value.captchaId = data.captchaId
+    captchaUrl.value = data.imageBase64
+  }
+  catch (error) {
+    console.error(error)
+  }
+}, 500, {
+  leading: true, // 立即执行第一次调用（可选，根据需求）
+  trailing: false, // 防止节流结束后重复执行（可选）
+})
 
 // 尝试从本地存储获取登录信息
 const localAccountInfo = lStorage.get('loginAccountInfo')
@@ -200,7 +214,7 @@ async function handleLogin() {
 
   // 账号密码登录
   if (mode === 'account') {
-    const { username, password, captcha } = accountInfo.value
+    const { username, password, captcha, captchaId } = accountInfo.value
 
     if (!username || !password)
       return $message.warning('请输入用户名和密码')
@@ -210,7 +224,7 @@ async function handleLogin() {
     try {
       loading.value = true
       $message.loading('正在验证，请稍后...', { key: 'login' })
-      const { data } = await api.loginByPassword({ username, password: password.toString(), captcha })
+      const { data } = await api.loginByPassword({ username, password: password.toString(), code: captcha, captchaId })
       if (isRemember.value) {
         lStorage.set('loginAccountInfo', { username, password })
       }
@@ -220,10 +234,8 @@ async function handleLogin() {
       onLoginSuccess(data)
     }
     catch (error) {
-    // 10003为验证码错误专属业务码
-      if (error?.code === 10003) {
-      // 为防止爆破，验证码错误则刷新验证码
-        initCaptcha()
+      if (error?.code === 1400) {
+        initCaptcha() // 为防止爆破，验证码错误则刷新验证码
       }
       $message.destroy('login')
       console.error(error)
@@ -259,7 +271,7 @@ async function handleLogin() {
 
 // 处理登录成功后的逻辑
 async function onLoginSuccess(data = {}) {
-  authStore.setToken(data.data)
+  authStore.setToken(data.token)
   $message.loading('登录中...', { key: 'login' })
   try {
     $message.success('登录成功', { key: 'login' })
@@ -284,7 +296,7 @@ async function sendSmsCode() {
     return $message.warning('请输入正确的手机号')
   try {
     sendingCode.value = true
-    await api.sendSmsCode({ phone: smsInfo.value.phone })
+    await api.sendSmsCode({ phone: smsInfo.value.phone, purpose: 'LOGIN' })
     $message.success('验证码发送成功')
   }
   catch (error) {
