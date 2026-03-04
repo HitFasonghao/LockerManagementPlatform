@@ -30,17 +30,23 @@ export function createPermissionGuard(router) {
       userStore.setUser(user)
       permissionStore.setPermissions(permissions)
 
+      // 预加载项目中 @/views 目录下所有 .vue 后缀的页面组件，生成一个路由路径到组件的映射表
       const routeComponents = import.meta.glob('@/views/**/*.vue')
+      // 遍历权限路由表，把组件路径替换为对应的组件加载函数，并动态添加到router中
       permissionStore.accessRoutes.forEach((route) => {
+        // 把字符串格式的组件路径（如 @/views/home/index.vue），替换成routeComponents中对应的组件加载函数
         route.component = routeComponents[route.component] || undefined
+        // 避免重复添加
         !router.hasRoute(route.name) && router.addRoute(route)
       })
+      // 动态添加路由后，重新触发一次当前的路由跳转，让 Vue Router 能匹配到刚添加的动态路由，完成页面跳转
+      // replace: true 表示用replace 模式跳转（等价于 router.replace()），不会在浏览器的历史记录中新增一条记录
       return { ...to, replace: true }
     }
 
     const routes = router.getRoutes()
     if (routes.find(route => route.name === to.name))
-      return true
+      return true// 路由存在，直接放行
 
     // 判断是无权限还是404
     const { data: hasMenu } = await api.validateMenuPath(to.path)
