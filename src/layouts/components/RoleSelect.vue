@@ -46,9 +46,9 @@
 import api from '@/api'
 import { MeModal } from '@/components'
 import { useModal } from '@/composables'
-import { useAuthStore, useUserStore } from '@/store'
+import { useAdminInfoStore, useAuthStore } from '@/store'
 
-const userStore = useUserStore()
+const userStore = useAdminInfoStore()
 const authStore = useAuthStore()
 
 const roles = ref(userStore.roles || [])

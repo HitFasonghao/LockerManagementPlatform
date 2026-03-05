@@ -1,5 +1,5 @@
 import api from '@/api'
-import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
+import { useAdminInfoStore, useAuthStore, usePermissionStore } from '@/store'
 import { getPermissions } from '@/store/helper'
 
 const WHITE_LIST = ['/login', '/404']
@@ -22,10 +22,10 @@ export function createPermissionGuard(router) {
     if (WHITE_LIST.includes(to.path))
       return true
 
-    const userStore = useUserStore()
+    const userStore = useAdminInfoStore()
     const permissionStore = usePermissionStore()
     if (!permissionStore.permissions.length) {
-      // 有token但没有用户信息，需要重新获取用户信息和权限，并动态添加可访问的路由
+      // 有token但没有权限信息，并动态添加可访问的路由
       // const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
 
       const permissions = await getPermissions()

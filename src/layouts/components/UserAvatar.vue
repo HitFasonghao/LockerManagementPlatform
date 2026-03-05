@@ -2,7 +2,7 @@
   <n-dropdown :options="options" @select="handleSelect">
     <div id="user-dropdown" class="flex cursor-pointer items-center">
       <n-avatar round :size="36" :src="userStore.avatar" />
-      <div v-if="userStore.userInfo" class="ml-12 flex-col flex-shrink-0 items-center">
+      <div v-if="userStore.adminInfo" class="ml-12 flex-col flex-shrink-0 items-center">
         <span class="text-14">{{ userStore.nickName ?? userStore.username }}</span>
         <span class="text-12 opacity-50">[{{ userStore.currentRole?.name }}]</span>
       </div>
@@ -15,10 +15,10 @@
 <script setup>
 import api from '@/api'
 import { RoleSelect } from '@/layouts/components'
-import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
+import { useAdminInfoStore, useAuthStore, usePermissionStore } from '@/store'
 
 const router = useRouter()
-const userStore = useUserStore()
+const userStore = useAdminInfoStore()
 const authStore = useAuthStore()
 const permissionStore = usePermissionStore()
 

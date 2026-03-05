@@ -1,32 +1,38 @@
 import { defineStore } from 'pinia'
 
-export const useUserStore = defineStore('user', {
+export const useAdminInfoStore = defineStore('adminInfo', {
   state: () => ({
-    userInfo: null,
+    adminInfo: null,
   }),
   getters: {
-    userId() {
-      return this.userInfo?.id
-    },
     username() {
-      return this.userInfo?.username
+      return this.adminInfo?.username
     },
-    nickName() {
-      return this.userInfo?.nickName
+    realName() {
+      return this.adminInfo?.realName
     },
-    avatar() {
-      return this.userInfo?.avatar
+    email() {
+      return this.adminInfo?.email
     },
-    currentRole() {
-      return this.userInfo?.currentRole || {}
+    phone() {
+      return this.adminInfo?.phone
     },
-    roles() {
-      return this.userInfo?.roles || []
+    isSuperAdmin() {
+      return this.adminInfo?.isSuperAdmin || false
+    },
+    isActive() {
+      return this.adminInfo?.isActive || false
+    },
+    createdTime() {
+      return this.adminInfo?.createdTime || null
+    },
+    updatedTime() {
+      return this.adminInfo?.updatedTime || null
     },
   },
   actions: {
-    setUser(user) {
-      this.userInfo = user
+    setUser(adminInfo) {
+      this.adminInfo = adminInfo
     },
     resetUser() {
       this.$reset()

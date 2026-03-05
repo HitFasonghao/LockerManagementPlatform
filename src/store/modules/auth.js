@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { usePermissionStore, useRouterStore, useTabStore, useUserStore } from '@/store'
+import { useAdminInfoStore, usePermissionStore, useRouterStore, useTabStore } from '@/store'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
       this.setToken(data)
     },
     resetLoginState() {
-      const { resetUser } = useUserStore()
+      const { resetUser } = useAdminInfoStore()
       const { resetRouter } = useRouterStore()
       const { resetPermission, accessRoutes } = usePermissionStore()
       const { resetTabs } = useTabStore()
