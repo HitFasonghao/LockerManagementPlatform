@@ -1,6 +1,6 @@
 import api from '@/api'
 import { useAuthStore, usePermissionStore, useUserStore } from '@/store'
-import { getPermissions, getUserInfo } from '@/store/helper'
+import { getPermissions } from '@/store/helper'
 
 const WHITE_LIST = ['/login', '/404']
 export function createPermissionGuard(router) {
@@ -24,10 +24,12 @@ export function createPermissionGuard(router) {
 
     const userStore = useUserStore()
     const permissionStore = usePermissionStore()
-    if (!userStore.userInfo) {
+    if (!permissionStore.permissions.length) {
       // 有token但没有用户信息，需要重新获取用户信息和权限，并动态添加可访问的路由
-      const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
-      userStore.setUser(user)
+      // const [user, permissions] = await Promise.all([getUserInfo(), getPermissions()])
+
+      const permissions = await getPermissions()
+      // userStore.setUser(user)
       permissionStore.setPermissions(permissions)
 
       // 预加载项目中 @/views 目录下所有 .vue 后缀的页面组件，生成一个路由路径到组件的映射表

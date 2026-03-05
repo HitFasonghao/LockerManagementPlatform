@@ -1,14 +1,15 @@
 <template>
   <AppPage show-footer>
     <div class="flex">
+      <!--
       <n-card class="min-w-200 w-30%">
         <div class="flex items-center">
-          <n-avatar round :size="60" :src="userStore.avatar" class="flex-shrink-0" />
+          <n-avatar round :size="60" :src="null" class="flex-shrink-0" />
           <div class="ml-20 flex-col">
             <span class="text-20 opacity-80">
-              Hello, {{ userStore.nickName ?? userStore.username }}
+              Hello, 用户名或者昵称
             </span>
-            <span class="mt-4 opacity-50">当前角色：{{ userStore.currentRole?.name }}</span>
+            <span class="mt-4 opacity-50">当前角色：用户身份</span>
           </div>
         </div>
 
@@ -19,6 +20,7 @@
           —— 查尔斯·史考伯
         </p>
       </n-card>
+      -->
       <n-card class="ml-12 w-70%" title="✨ 欢迎使用 Vue Naive Admin 2.0">
         <template #header-extra>
           <a
@@ -157,9 +159,10 @@ import * as echarts from 'echarts/core'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
+/*
 import { useUserStore } from '@/store'
 
-const userStore = useUserStore()
+const userStore = useUserStore() */
 
 echarts.use([
   TooltipComponent,

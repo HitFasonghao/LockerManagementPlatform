@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:50:42
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <n-dropdown :options="options" @select="handleSelect">
     <div id="user-dropdown" class="flex cursor-pointer items-center">
@@ -37,12 +29,13 @@ const options = reactive([
     icon: () => h('i', { class: 'i-material-symbols:person-outline text-14' }),
     show: computed(() => permissionStore.accessRoutes?.some(item => item.path === '/profile')),
   },
+  /*
   {
     label: '切换角色',
     key: 'toggleRole',
     icon: () => h('i', { class: 'i-basil:exchange-solid text-14' }),
     show: computed(() => userStore.roles.length > 1),
-  },
+  }, */
   {
     label: '退出登录',
     key: 'logout',

@@ -18,7 +18,7 @@ function reqResolve(config) {
   const { accessToken } = useAuthStore() // 从store中获取accessToken
   if (accessToken) {
     // 把token添加到请求头中
-    config.headers.Authorization = `Bearer ${accessToken}`
+    config.headers.Authorization = accessToken
   }
 
   return config
