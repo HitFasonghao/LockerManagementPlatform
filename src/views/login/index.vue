@@ -289,7 +289,7 @@ async function onLoginSuccess(data = {}) {
     $message.destroy('login')
   }
 }
-
+// 发送短信验证码
 async function sendSmsCode() {
   const { phone } = smsInfo.value
   if (!phone || !/^1[3-9]\d{9}$/.test(phone))
