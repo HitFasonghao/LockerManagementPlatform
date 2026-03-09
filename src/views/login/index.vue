@@ -101,7 +101,7 @@
             <n-input
               v-model:value="smsInfo.code"
               class="h-40 items-center"
-              palceholder="请输入验证码"
+              placeholder="请输入验证码"
               :maxlength="6"
               @keydown.enter="handleLogin()"
             >

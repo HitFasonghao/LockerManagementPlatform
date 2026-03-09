@@ -68,30 +68,21 @@
       </n-descriptions>
     </n-card>
 
-    <MeModal ref="avatarModalRef" width="420px" title="更改头像" @ok="handleAvatarSave()">
-      <n-input v-model:value="newAvatar" />
-    </MeModal>
-
     <MeModal ref="pwdModalRef" title="修改密码" width="420px" @ok="handlePwdSave()">
-      <n-form
-        ref="pwdFormRef"
-        :model="pwdForm"
-        label-placement="left"
-        require-mark-placement="left"
-      >
-        <n-form-item label="新密码" path="oldPassword" :rule="pwdRules.required">
+      <n-form ref="pwdFormRef" :model="pwdForm" label-placement="left" require-mark-placement="left">
+        <n-form-item label="新密码" path="newPassword" :rule="pwdRules.required">
           <n-input v-model:value="pwdForm.newPassword" type="password" placeholder="请输入新密码" show-password-on="mousedown" />
         </n-form-item>
-        <n-form-item label="确认新密码" path="confirmPassword" :rule="pwdRules.required">
+        <n-form-item label="确认新密码" path="confirmPassword" :rule="confirmRule">
           <n-input v-model:value="pwdForm.confirmPassword" type="password" placeholder="请确认新密码" show-password-on="mousedown" />
         </n-form-item>
         <n-form-item label="验证码" path="code" :rule="pwdRules.required">
           <n-input
             v-model:value="pwdForm.code"
             class="h-40 items-center"
-            palceholder="请输入验证码"
+            placeholder="请输入验证码"
             :maxlength="6"
-            @keydown.enter="handleLogin()"
+            @keydown.enter="handlePwdSave()"
           >
             <template #prefix>
               <i class="i-fe:shield mr-12 opacity-20" />
@@ -102,7 +93,7 @@
                 type="primary"
                 size="small"
                 :loading="sendingCode"
-                :disabled="sendingCode || !smsInfo.phone"
+                :disabled="sendingCode || !adminInfo.phone"
                 @click.stop="sendSmsCode"
               >
                 {{ sendingCode ? '发送中...' : '获取验证码' }}
@@ -115,7 +106,7 @@
 
     <MeModal ref="profileModalRef" title="修改资料" width="420px" @ok="handleProfileSave()">
       <n-form ref="profileFormRef" :model="profileForm" label-placement="left" require-mark-placement="left">
-        <n-form-item label="用户名" path="username" :rule="profileRules.required">
+        <n-form-item label="用户名" path="username">
           <n-input v-model:value="profileForm.username" placeholder="请输入用户名" />
         </n-form-item>
         <n-form-item label="姓名" path="realName">
@@ -132,7 +123,6 @@
 <script setup>
 import { MeModal } from '@/components'
 import { useForm, useModal } from '@/composables'
-import { getUserInfo } from '@/store/helper'
 import api from './api'
 
 const adminInfo = ref({
@@ -172,12 +162,40 @@ onMounted(async () => { // 页面加载时获取用户信息
  */
 
 const [pwdModalRef] = useModal()
-const [pwdFormRef, pwdForm, pwdValidation, pwdRules] = useForm()
+const [pwdFormRef, pwdForm, pwdValidation, pwdRules] = useForm({
+  newPassword: '',
+  confirmPassword: '',
+  code: '',
+})
+const updatePwdForm = {
+  password: '',
+  code: '',
+}
+const confirmRule = [
+  {
+    required: true,
+    message: '此项为必填项',
+    trigger: ['input', 'blur'],
+  },
+  {
+    validator: (rule, value) => {
+      if (!value)
+        return new Error('请确认新密码')
+      if (value !== pwdForm.value.newPassword) {
+        return new Error('两次输入的密码不一致')
+      }
+      return true
+    },
+    trigger: ['input', 'blur'],
+  },
+]
+
 async function handlePwdSave() {
   await pwdValidation()
-  await api.changePassword(pwdForm.value)
+  updatePwdForm.password = pwdForm.value.newPassword
+  updatePwdForm.code = pwdForm.value.code
+  await api.updatePassword(updatePwdForm)
   $message.success('密码修改成功')
-  refreshUserInfo()
 }
 
 /**
@@ -191,20 +209,9 @@ const [profileFormRef, profileForm, profileValidation, profileRules] = useForm({
 })
 async function handleProfileSave() {
   await profileValidation()
-  await api.updateProfile(profileForm.value)
+  const submitData = convertEmptyStringToNull({ ...profileForm.value })
+  await api.updateProfile(submitData)
   $message.success('资料修改成功')
-  refreshUserInfo()
-}
-
-const newAvatar = ref(adminInfo.value.avatar)
-const [avatarModalRef] = useModal()
-async function handleAvatarSave() {
-  if (!newAvatar.value) {
-    $message.error('请输入头像地址')
-    return false
-  }
-  await api.updateProfile({ id: adminInfo.value.userId, avatar: newAvatar.value })
-  $message.success('头像修改成功')
   refreshUserInfo()
 }
 
@@ -218,8 +225,10 @@ const isAccountStatus = [
 ]
 
 async function refreshUserInfo() {
-  const user = await getUserInfo()
-  adminInfo.value.setUser(user)
+  const { data } = await api.queryAdminInfo()
+  adminInfo.value.username = data.username || ''
+  adminInfo.value.realName = data.realName || ''
+  adminInfo.value.email = data.email || ''
 }
 
 async function sendSmsCode() {
@@ -228,7 +237,7 @@ async function sendSmsCode() {
     return $message.warning('请输入正确的手机号')
   try {
     sendingCode.value = true
-    await api.sendSmsCode({ phone, purpose: 'LOGIN' })
+    await api.sendSmsCode({ phone, purpose: 'UPDATE_PASSWORD' })
     $message.success('验证码发送成功')
   }
   catch (error) {
@@ -238,5 +247,18 @@ async function sendSmsCode() {
   finally {
     sendingCode.value = false
   }
+}
+
+function convertEmptyStringToNull(obj) {
+  const result = {}
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // 将空字符串、仅包含空格的字符串转为null，其他值保持不变
+      result[key] = (obj[key] === '' || (typeof obj[key] === 'string' && obj[key].trim() === ''))
+        ? null
+        : obj[key]
+    }
+  }
+  return result
 }
 </script>
