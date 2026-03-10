@@ -1,9 +1,16 @@
 <template>
   <CommonPage>
-    <n-data-table :columns="columns" :data="qualifiedVendors" :loading="loading" :row-key="row => row.vendorId" />
+    <template #action>
+      <NButton @click="loadData">
+        <i class="i-fe:rotate-ccw mr-4 text-14" />
+        刷新
+      </NButton>
+    </template>
 
-    <!-- 查看厂商信息对话框 -->
-    <n-modal v-model:show="detailVisible" preset="card" title="厂商资质信息" style="width: 800px;">
+    <n-data-table :columns="columns" :data="vendorList" :loading="loading" :row-key="row => row.vendorId" :scroll-x="1200" />
+
+    <!-- 厂商详情对话框 -->
+    <n-modal v-model:show="detailVisible" preset="card" title="厂商信息" style="width: 800px;">
       <template v-if="currentVendor">
         <n-card title="基本信息" size="small">
           <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '120px' }">
@@ -84,69 +91,85 @@
         </n-card>
       </template>
     </n-modal>
+
+    <!-- 操作确认对话框 -->
+    <n-modal v-model:show="operationVisible" preset="dialog" :title="operationTitle" positive-text="确认" negative-text="取消" :loading="operationLoading" @positive-click="handleOperation">
+      <n-form label-placement="left" :label-width="80">
+        <n-form-item label="厂商">
+          {{ operationVendor?.companyName }}
+        </n-form-item>
+        <n-form-item label="操作说明">
+          <n-input v-model:value="operationNotes" type="textarea" placeholder="请输入操作说明（选填）" :rows="3" />
+        </n-form-item>
+      </n-form>
+    </n-modal>
   </CommonPage>
 </template>
 
 <script setup>
-import { NButton, NTag } from 'naive-ui'
+import { NButton, NSpace, NTag } from 'naive-ui'
 import api from './api'
 
-defineOptions({ name: 'VendorInfo' })
+defineOptions({ name: 'VendorMgmtApproved' })
 
 const loading = ref(false)
-const allVendors = ref([])
+const vendorList = ref([])
 const detailVisible = ref(false)
 const currentVendor = ref(null)
 
-const statusMap = {
-  approved: { label: '已通过', type: 'success' },
-  suspended: { label: '已暂停', type: 'warning' },
-  banned: { label: '已禁用', type: 'error' },
-}
-
-const qualifiedVendors = computed(() =>
-  allVendors.value.filter(v => ['approved', 'suspended', 'banned'].includes(v.status)),
-)
+const operationVisible = ref(false)
+const operationLoading = ref(false)
+const operationTitle = ref('')
+const operationVendor = ref(null)
+const operationNotes = ref('')
+const operationType = ref('')
 
 const columns = [
-  { title: '厂商编码', key: 'vendorCode', width: 140 },
-  { title: '公司名称', key: 'companyName', ellipsis: { tooltip: true }, width: 200 },
-  { title: '公司简称', key: 'shortName', width: 120 },
+  { title: '公司名称', key: 'companyName', width: 200, ellipsis: { tooltip: true } },
+  { title: '简称', key: 'shortName', width: 100 },
+  { title: '联系人', key: 'contactPerson', width: 100 },
+  { title: '联系电话', key: 'contactPhone', width: 130 },
   {
     title: '状态',
     key: 'status',
     width: 100,
-    render: row => h(NTag, {
-      type: statusMap[row.status]?.type ?? 'default',
-      size: 'small',
-    }, { default: () => statusMap[row.status]?.label ?? row.status }),
+    render: row => h(NTag, { type: 'success', size: 'small' }, { default: () => '正常' }),
   },
-  { title: '审批时间', key: 'approvedTime', width: 180 },
-  { title: '生效日期', key: 'effectiveFrom', width: 140 },
-  { title: '失效日期', key: 'effectiveTo', width: 140 },
+  { title: '提交时间', key: 'submittedTime', width: 170 },
   {
     title: '操作',
     key: 'actions',
-    width: 120,
+    width: 280,
     align: 'right',
-    render: row => h(
-      NButton,
-      { size: 'small', type: 'primary', secondary: true, onClick: () => handleView(row) },
-      {
-        default: () => '查看详情',
-        icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
-      },
-    ),
+    fixed: 'right',
+    render(row) {
+      return h(NSpace, { justify: 'end' }, {
+        default: () => [
+          h(NButton, { size: 'small', type: 'primary', secondary: true, onClick: () => handleView(row) }, {
+            default: () => '查看详情',
+            icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
+          }),
+          h(NButton, { size: 'small', type: 'warning', secondary: true, onClick: () => openOperation(row, 'suspend') }, {
+            default: () => '暂停',
+            icon: () => h('i', { class: 'i-material-symbols:pause-circle-outline text-14' }),
+          }),
+          h(NButton, { size: 'small', type: 'error', secondary: true, onClick: () => openOperation(row, 'ban') }, {
+            default: () => '封禁',
+            icon: () => h('i', { class: 'i-material-symbols:block text-14' }),
+          }),
+        ],
+      })
+    },
   },
 ]
 
-onMounted(() => loadVendors())
+onMounted(() => loadData())
 
-async function loadVendors() {
+async function loadData() {
   loading.value = true
   try {
-    const { data } = await api.getMyVendors()
-    allVendors.value = data || []
+    const { data } = await api.getApprovedVendors()
+    vendorList.value = data || []
   }
   catch (error) {
     console.error(error)
@@ -156,8 +179,47 @@ async function loadVendors() {
   }
 }
 
-function handleView(row) {
-  currentVendor.value = row
-  detailVisible.value = true
+async function handleView(row) {
+  try {
+    const { data } = await api.getVendorDetail(row.vendorId)
+    currentVendor.value = data
+    detailVisible.value = true
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+function openOperation(row, type) {
+  operationVendor.value = row
+  operationType.value = type
+  operationNotes.value = ''
+  operationTitle.value = type === 'suspend' ? '暂停合作' : '封禁厂商'
+  operationVisible.value = true
+}
+
+async function handleOperation() {
+  operationLoading.value = true
+  try {
+    const vendorId = operationVendor.value.vendorId
+    const payload = { notes: operationNotes.value || null }
+    if (operationType.value === 'suspend') {
+      await api.suspendVendor(vendorId, payload)
+      $message.success('已暂停合作')
+    }
+    else {
+      await api.banVendor(vendorId, payload)
+      $message.success('已封禁厂商')
+    }
+    operationVisible.value = false
+    await loadData()
+  }
+  catch (error) {
+    console.error(error)
+    return false
+  }
+  finally {
+    operationLoading.value = false
+  }
 }
 </script>

@@ -1,9 +1,16 @@
 <template>
   <CommonPage>
-    <n-data-table :columns="columns" :data="qualifiedVendors" :loading="loading" :row-key="row => row.vendorId" />
+    <template #action>
+      <NButton @click="loadData">
+        <i class="i-fe:rotate-ccw mr-4 text-14" />
+        刷新
+      </NButton>
+    </template>
 
-    <!-- 查看厂商信息对话框 -->
-    <n-modal v-model:show="detailVisible" preset="card" title="厂商资质信息" style="width: 800px;">
+    <n-data-table :columns="columns" :data="vendorList" :loading="loading" :row-key="row => row.vendorId" :scroll-x="1200" />
+
+    <!-- 厂商详情对话框 -->
+    <n-modal v-model:show="detailVisible" preset="card" title="厂商信息" style="width: 800px;">
       <template v-if="currentVendor">
         <n-card title="基本信息" size="small">
           <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '120px' }">
@@ -84,34 +91,47 @@
         </n-card>
       </template>
     </n-modal>
+
+    <!-- 恢复确认对话框 -->
+    <n-modal v-model:show="restoreVisible" preset="dialog" title="恢复合作" positive-text="确认恢复" negative-text="取消" :loading="restoreLoading" @positive-click="handleRestore">
+      <n-form label-placement="left" :label-width="80">
+        <n-form-item label="厂商">
+          {{ restoreVendor?.companyName }}
+        </n-form-item>
+        <n-form-item label="操作说明">
+          <n-input v-model:value="restoreNotes" type="textarea" placeholder="请输入恢复说明（选填）" :rows="3" />
+        </n-form-item>
+      </n-form>
+    </n-modal>
   </CommonPage>
 </template>
 
 <script setup>
-import { NButton, NTag } from 'naive-ui'
+import { NButton, NSpace, NTag } from 'naive-ui'
 import api from './api'
 
-defineOptions({ name: 'VendorInfo' })
+defineOptions({ name: 'VendorMgmtAbnormal' })
 
 const loading = ref(false)
-const allVendors = ref([])
+const vendorList = ref([])
 const detailVisible = ref(false)
 const currentVendor = ref(null)
 
+const restoreVisible = ref(false)
+const restoreLoading = ref(false)
+const restoreVendor = ref(null)
+const restoreNotes = ref('')
+
 const statusMap = {
-  approved: { label: '已通过', type: 'success' },
   suspended: { label: '已暂停', type: 'warning' },
-  banned: { label: '已禁用', type: 'error' },
+  banned: { label: '已封禁', type: 'error' },
 }
 
-const qualifiedVendors = computed(() =>
-  allVendors.value.filter(v => ['approved', 'suspended', 'banned'].includes(v.status)),
-)
-
 const columns = [
-  { title: '厂商编码', key: 'vendorCode', width: 140 },
-  { title: '公司名称', key: 'companyName', ellipsis: { tooltip: true }, width: 200 },
-  { title: '公司简称', key: 'shortName', width: 120 },
+  { title: '公司名称', key: 'companyName', width: 200, ellipsis: { tooltip: true } },
+  { title: '简称', key: 'shortName', width: 100 },
+  { title: '联系人', key: 'contactPerson', width: 100 },
+  { title: '联系电话', key: 'contactPhone', width: 130 },
   {
     title: '状态',
     key: 'status',
@@ -121,32 +141,40 @@ const columns = [
       size: 'small',
     }, { default: () => statusMap[row.status]?.label ?? row.status }),
   },
-  { title: '审批时间', key: 'approvedTime', width: 180 },
-  { title: '生效日期', key: 'effectiveFrom', width: 140 },
-  { title: '失效日期', key: 'effectiveTo', width: 140 },
+  { title: '提交时间', key: 'submittedTime', width: 170 },
   {
     title: '操作',
     key: 'actions',
-    width: 120,
+    width: 230,
     align: 'right',
-    render: row => h(
-      NButton,
-      { size: 'small', type: 'primary', secondary: true, onClick: () => handleView(row) },
-      {
-        default: () => '查看详情',
-        icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
-      },
-    ),
+    fixed: 'right',
+    render(row) {
+      const buttons = [
+        h(NButton, { size: 'small', type: 'primary', secondary: true, onClick: () => handleView(row) }, {
+          default: () => '查看详情',
+          icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
+        }),
+      ]
+      if (row.status === 'suspended') {
+        buttons.push(
+          h(NButton, { size: 'small', type: 'success', secondary: true, onClick: () => openRestore(row) }, {
+            default: () => '恢复启用',
+            icon: () => h('i', { class: 'i-material-symbols:play-circle-outline text-14' }),
+          }),
+        )
+      }
+      return h(NSpace, { justify: 'end' }, { default: () => buttons })
+    },
   },
 ]
 
-onMounted(() => loadVendors())
+onMounted(() => loadData())
 
-async function loadVendors() {
+async function loadData() {
   loading.value = true
   try {
-    const { data } = await api.getMyVendors()
-    allVendors.value = data || []
+    const { data } = await api.getAbnormalVendors()
+    vendorList.value = data || []
   }
   catch (error) {
     console.error(error)
@@ -156,8 +184,37 @@ async function loadVendors() {
   }
 }
 
-function handleView(row) {
-  currentVendor.value = row
-  detailVisible.value = true
+async function handleView(row) {
+  try {
+    const { data } = await api.getVendorDetail(row.vendorId)
+    currentVendor.value = data
+    detailVisible.value = true
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+function openRestore(row) {
+  restoreVendor.value = row
+  restoreNotes.value = ''
+  restoreVisible.value = true
+}
+
+async function handleRestore() {
+  restoreLoading.value = true
+  try {
+    await api.restoreVendor(restoreVendor.value.vendorId, { notes: restoreNotes.value || null })
+    $message.success('已恢复合作')
+    restoreVisible.value = false
+    await loadData()
+  }
+  catch (error) {
+    console.error(error)
+    return false
+  }
+  finally {
+    restoreLoading.value = false
+  }
 }
 </script>

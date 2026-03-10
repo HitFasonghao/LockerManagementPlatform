@@ -76,7 +76,7 @@ const rejectedVendors = computed(() =>
 )
 
 const columns = [
-  { title: '公司名称', key: 'companyName', ellipsis: { tooltip: true } },
+  { title: '公司名称', key: 'companyName', ellipsis: { tooltip: true }, width: 200 },
   { title: '公司简称', key: 'shortName', width: 120 },
   {
     title: '状态',
@@ -89,10 +89,36 @@ const columns = [
     title: '操作',
     key: 'actions',
     width: 100,
+    align: 'right',
     render: row => h(
       NButton,
-      { size: 'small', type: 'primary', text: true, onClick: () => handleViewDetail(row) },
-      { default: () => '查看详情' },
+      { size: 'small', type: 'primary', secondary: true, onClick: () => handleViewDetail(row) },
+      {
+        default: () => '查看详情',
+        icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
+      },
+    ),
+  },
+  { title: '公司简称', key: 'shortName', width: 120 },
+  {
+    title: '状态',
+    key: 'status',
+    width: 100,
+    render: () => h(NTag, { type: 'error', size: 'small' }, { default: () => '已驳回' }),
+  },
+  { title: '提交时间', key: 'submittedTime', width: 180 },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 100,
+    align: 'right',
+    render: row => h(
+      NButton,
+      { size: 'small', type: 'primary', secondary: true, onClick: () => handleViewDetail(row) },
+      {
+        default: () => '查看详情',
+        icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
+      },
     ),
   },
 ]

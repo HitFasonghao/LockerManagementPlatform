@@ -1,20 +1,10 @@
 <template>
   <CommonPage>
     <template #action>
-      <n-space>
-        <n-select
-          v-model:value="statusFilter"
-          clearable
-          placeholder="按状态筛选"
-          :options="statusOptions"
-          class="w-160"
-          @update:value="loadData"
-        />
-        <NButton @click="loadData">
-          <i class="i-fe:rotate-ccw mr-4 text-14" />
-          刷新
-        </NButton>
-      </n-space>
+      <NButton @click="loadData">
+        <i class="i-fe:rotate-ccw mr-4 text-14" />
+        刷新
+      </NButton>
     </template>
 
     <n-spin :show="loading">
@@ -37,7 +27,6 @@ defineOptions({ name: 'AuditVendors' })
 const router = useRouter()
 const loading = ref(false)
 const vendorList = ref([])
-const statusFilter = ref(null)
 
 const statusMap = {
   pending: { label: '待资质审核', type: 'warning' },
@@ -48,15 +37,7 @@ const statusMap = {
   banned: { label: '已禁用', type: 'error' },
 }
 
-const statusOptions = [
-  { label: '待资质审核', value: 'pending' },
-  { label: '技术测试中', value: 'testing' },
-  { label: '已通过', value: 'approved' },
-  { label: '已驳回', value: 'rejected' },
-]
-
 const columns = [
-  { title: '厂商ID', key: 'vendorId', width: 80 },
   { title: '公司名称', key: 'companyName', width: 200, ellipsis: { tooltip: true } },
   { title: '简称', key: 'shortName', width: 100 },
   { title: '联系人', key: 'contactPerson', width: 100 },
@@ -89,11 +70,12 @@ const columns = [
         {
           size: 'small',
           type: 'primary',
+          secondary: true,
           onClick: () => router.push(`/audit/review/${row.vendorId}`),
         },
         {
-          default: () => '审核',
-          icon: () => h('i', { class: 'i-material-symbols:fact-check-outline text-14' }),
+          default: () => '审核详情',
+          icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
         },
       )
     },
@@ -107,10 +89,7 @@ onMounted(() => {
 async function loadData() {
   loading.value = true
   try {
-    const params = {}
-    if (statusFilter.value)
-      params.status = statusFilter.value
-    const { data } = await api.getVendorList(params)
+    const { data } = await api.getVendorList()
     vendorList.value = data || []
   }
   catch (error) {

@@ -48,7 +48,6 @@ const [addFormRef, addForm, addValidation] = useForm({
 })
 
 const columns = [
-  { title: '用户ID', key: 'vendorUserId', width: 100 },
   { title: '用户名', key: 'username', width: 150 },
   { title: '真实姓名', key: 'realName', width: 120 },
   { title: '手机号', key: 'phone', width: 140 },

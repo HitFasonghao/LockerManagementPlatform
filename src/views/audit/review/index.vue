@@ -1,7 +1,7 @@
 <template>
   <CommonPage back>
     <n-spin :show="loading">
-      <!-- 厂商基本信息 -->
+      <!-- 厂商资质信息 -->
       <n-card title="厂商资质信息">
         <template #header-extra>
           <NTag v-if="vendor.status" :type="statusMap[vendor.status]?.type ?? 'default'">
@@ -89,113 +89,6 @@
         </n-timeline>
       </n-card>
 
-      <!-- 审核操作面板 -->
-      <n-card class="mt-20" title="审核操作">
-        <n-tabs type="line">
-          <!-- 资质审核 Tab -->
-          <n-tab-pane name="qualification" tab="资质审核">
-            <n-form label-placement="left" :label-width="100">
-              <n-form-item label="审核结果">
-                <n-radio-group v-model:value="qualificationForm.auditResult">
-                  <n-radio value="pass">
-                    通过
-                  </n-radio>
-                  <n-radio value="fail">
-                    不通过
-                  </n-radio>
-                </n-radio-group>
-              </n-form-item>
-              <n-form-item label="审核意见">
-                <n-input v-model:value="qualificationForm.auditNotes" type="textarea" :rows="3" placeholder="请输入审核意见" />
-              </n-form-item>
-              <n-form-item>
-                <n-button
-                  type="primary"
-                  :loading="qualSubmitting"
-                  :disabled="vendor.status !== 'pending'"
-                  @click="handleQualificationAudit"
-                >
-                  提交资质审核
-                </n-button>
-              </n-form-item>
-            </n-form>
-          </n-tab-pane>
-
-          <!-- 技术测试审核 Tab -->
-          <n-tab-pane name="techTest" tab="技术测试审核">
-            <n-form label-placement="left" :label-width="100">
-              <n-form-item label="测试结果">
-                <n-radio-group v-model:value="techTestForm.testResult">
-                  <n-radio value="testing">
-                    开始测试
-                  </n-radio>
-                  <n-radio value="passed">
-                    通过
-                  </n-radio>
-                  <n-radio value="failed">
-                    未通过
-                  </n-radio>
-                </n-radio-group>
-              </n-form-item>
-              <n-form-item label="测试反馈">
-                <n-input v-model:value="techTestForm.testNotes" type="textarea" :rows="3" placeholder="请输入测试反馈" />
-              </n-form-item>
-              <n-form-item label="API检验结果">
-                <n-input v-model:value="techTestForm.apiValidationResultStr" type="textarea" :rows="2" placeholder="JSON格式（可选）" />
-              </n-form-item>
-              <n-form-item label="性能测试结果">
-                <n-input v-model:value="techTestForm.performanceResultStr" type="textarea" :rows="2" placeholder="JSON格式（可选）" />
-              </n-form-item>
-              <n-form-item>
-                <n-button
-                  type="primary"
-                  :loading="techSubmitting"
-                  :disabled="vendor.status !== 'testing'"
-                  @click="handleTechTestAudit"
-                >
-                  提交技术测试审核
-                </n-button>
-              </n-form-item>
-            </n-form>
-          </n-tab-pane>
-
-          <!-- 最终审批 Tab -->
-          <n-tab-pane name="final" tab="最终审批">
-            <n-form label-placement="left" :label-width="100">
-              <n-form-item label="审批结果">
-                <n-radio-group v-model:value="finalForm.approved">
-                  <n-radio :value="true">
-                    批准
-                  </n-radio>
-                  <n-radio :value="false">
-                    驳回
-                  </n-radio>
-                </n-radio-group>
-              </n-form-item>
-              <n-form-item label="审批意见">
-                <n-input v-model:value="finalForm.notes" type="textarea" :rows="3" placeholder="请输入审批意见" />
-              </n-form-item>
-              <n-form-item label="生效日期">
-                <n-date-picker v-model:value="finalForm.effectiveFromTs" type="datetime" clearable class="w-full" />
-              </n-form-item>
-              <n-form-item label="失效日期">
-                <n-date-picker v-model:value="finalForm.effectiveToTs" type="datetime" clearable class="w-full" />
-              </n-form-item>
-              <n-form-item>
-                <n-button
-                  type="primary"
-                  :loading="finalSubmitting"
-                  :disabled="vendor.status !== 'testing'"
-                  @click="handleFinalApproval"
-                >
-                  提交最终审批
-                </n-button>
-              </n-form-item>
-            </n-form>
-          </n-tab-pane>
-        </n-tabs>
-      </n-card>
-
       <!-- 历史审核记录 -->
       <n-card v-if="auditRecords.length" class="mt-20" title="历史审核记录">
         <n-data-table
@@ -218,17 +111,9 @@ const route = useRoute()
 const vendorId = computed(() => Number(route.params.id))
 
 const loading = ref(false)
-const qualSubmitting = ref(false)
-const techSubmitting = ref(false)
-const finalSubmitting = ref(false)
-
 const vendor = ref({})
 const progress = ref({})
 const auditRecords = ref([])
-
-const qualificationForm = ref({ auditResult: null, auditNotes: '' })
-const techTestForm = ref({ testResult: null, testNotes: '', apiValidationResultStr: '', performanceResultStr: '' })
-const finalForm = ref({ approved: null, notes: '', effectiveFromTs: null, effectiveToTs: null })
 
 const statusMap = {
   draft: { label: '草稿', type: 'default' },
@@ -302,86 +187,6 @@ async function loadAll() {
   }
   finally {
     loading.value = false
-  }
-}
-
-async function handleQualificationAudit() {
-  if (!qualificationForm.value.auditResult) {
-    $message.warning('请选择审核结果')
-    return
-  }
-  qualSubmitting.value = true
-  try {
-    await api.qualificationAudit(vendorId.value, qualificationForm.value)
-    $message.success('资质审核提交成功')
-    await loadAll()
-  }
-  catch (error) {
-    console.error(error)
-  }
-  finally {
-    qualSubmitting.value = false
-  }
-}
-
-async function handleTechTestAudit() {
-  if (!techTestForm.value.testResult) {
-    $message.warning('请选择测试结果')
-    return
-  }
-  techSubmitting.value = true
-  try {
-    const submitData = {
-      testResult: techTestForm.value.testResult,
-      testNotes: techTestForm.value.testNotes,
-      apiValidationResult: parseJsonSafe(techTestForm.value.apiValidationResultStr),
-      performanceResult: parseJsonSafe(techTestForm.value.performanceResultStr),
-    }
-    await api.techTestAudit(vendorId.value, submitData)
-    $message.success('技术测试审核提交成功')
-    await loadAll()
-  }
-  catch (error) {
-    console.error(error)
-  }
-  finally {
-    techSubmitting.value = false
-  }
-}
-
-async function handleFinalApproval() {
-  if (finalForm.value.approved === null) {
-    $message.warning('请选择审批结果')
-    return
-  }
-  finalSubmitting.value = true
-  try {
-    const submitData = {
-      approved: finalForm.value.approved,
-      notes: finalForm.value.notes,
-      effectiveFrom: finalForm.value.effectiveFromTs ? new Date(finalForm.value.effectiveFromTs).toISOString() : null,
-      effectiveTo: finalForm.value.effectiveToTs ? new Date(finalForm.value.effectiveToTs).toISOString() : null,
-    }
-    await api.finalApproval(vendorId.value, submitData)
-    $message.success('最终审批提交成功')
-    await loadAll()
-  }
-  catch (error) {
-    console.error(error)
-  }
-  finally {
-    finalSubmitting.value = false
-  }
-}
-
-function parseJsonSafe(str) {
-  if (!str || !str.trim())
-    return null
-  try {
-    return JSON.parse(str)
-  }
-  catch {
-    return str
   }
 }
 </script>
