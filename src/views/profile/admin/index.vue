@@ -2,7 +2,28 @@
   <AppPage show-footer>
     <n-card>
       <n-space align="center">
-        <n-avatar round :size="100" :src="adminInfo.avatar" />
+        <div class="relative">
+          <n-avatar round :size="100" :src="adminInfo.avatar || undefined" />
+          <n-button
+            class="absolute bottom-0 right-0"
+            circle
+            size="small"
+            type="primary"
+            :loading="avatarUploading"
+            @click="triggerAvatarUpload"
+          >
+            <template #icon>
+              <i class="i-fe:camera" />
+            </template>
+          </n-button>
+          <input
+            ref="avatarInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleAvatarChange"
+          >
+        </div>
         <div class="ml-20">
           <div class="flex items-center text-16">
             <span>用户名:</span>
@@ -16,16 +37,6 @@
               修改密码
             </n-button>
           </div>
-          <!--
-          <div class="mt-16 flex items-center">
-            <n-button type="primary" ghost @click="avatarModalRef.open()">
-              更改头像
-            </n-button>
-            <span class="ml-12 opacity-60">
-              修改头像只支持在线链接，不提供上传图片功能，如有需要可自行对接！
-            </span>
-          </div>
-          -->
         </div>
       </n-space>
     </n-card>
@@ -130,14 +141,17 @@ const adminInfo = ref({
   realName: '',
   phone: '',
   email: '',
+  avatar: '',
   isSuperAdmin: false,
   isActive: false,
   createdTime: '',
   updatedTime: '',
 })
 const sendingCode = ref(false)
+const avatarUploading = ref(false)
+const avatarInputRef = ref(null)
 
-onMounted(async () => { // 页面加载时获取用户信息
+onMounted(async () => {
   try {
     const { data } = await api.queryAdminInfo()
     adminInfo.value = {
@@ -145,6 +159,7 @@ onMounted(async () => { // 页面加载时获取用户信息
       realName: data.realName || '',
       phone: data.phone || '',
       email: data.email || '',
+      avatar: data.avatar || '',
       isSuperAdmin: data.isSuperAdmin || false,
       isActive: data.isActive || false,
       createdTime: data.createdTime || '',
@@ -156,6 +171,43 @@ onMounted(async () => { // 页面加载时获取用户信息
     $message.error('用户信息获取失败')
   }
 })
+
+/**
+ * 更换头像功能
+ */
+function triggerAvatarUpload() {
+  avatarInputRef.value?.click()
+}
+
+async function handleAvatarChange(e) {
+  const file = e.target.files?.[0]
+  if (!file)
+    return
+  if (!file.type.startsWith('image/')) {
+    $message.warning('请选择图片文件')
+    return
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    $message.warning('图片大小不能超过2MB')
+    return
+  }
+  try {
+    avatarUploading.value = true
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await api.updateAvatar(formData)
+    adminInfo.value.avatar = data
+    $message.success('头像更换成功')
+  }
+  catch (error) {
+    console.error(error)
+    $message.error('头像更换失败')
+  }
+  finally {
+    avatarUploading.value = false
+    e.target.value = ''
+  }
+}
 
 /**
  * 修改密码功能
@@ -253,7 +305,6 @@ function convertEmptyStringToNull(obj) {
   const result = {}
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      // 将空字符串、仅包含空格的字符串转为null，其他值保持不变
       result[key] = (obj[key] === '' || (typeof obj[key] === 'string' && obj[key].trim() === ''))
         ? null
         : obj[key]

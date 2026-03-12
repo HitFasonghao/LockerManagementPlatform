@@ -1,11 +1,3 @@
-<!--------------------------------
- - @Author: Ronnie Zhang
- - @LastEditor: Ronnie Zhang
- - @LastEditTime: 2023/12/16 18:51:10
- - @Email: zclzone@outlook.com
- - Copyright © 2023 Ronnie Zhang(大脸怪) | https://isme.top
- --------------------------------->
-
 <template>
   <AppCard class="flex items-center px-12" border-b="1px solid light_border dark:dark_border">
     <MenuCollapse />
@@ -19,14 +11,24 @@
 
       <Fullscreen />
 
-      <i
-        class="i-fe:github mr-16 cursor-pointer"
-        @click="handleLinkClick('https://github.com/zclzone/vue-naive-admin/tree/2.x')"
-      />
-      <i
-        class="i-me:gitee mr-16 cursor-pointer"
-        @click="handleLinkClick('https://gitee.com/isme-admin/vue-naive-admin/tree/2.x')"
-      />
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <i
+            class="i-fe:github mr-16 cursor-pointer"
+            @click="handleLinkClick('https://github.com/HitFasonghao/LockerManagementPlatform')"
+          />
+        </template>
+        前端仓库
+      </n-tooltip>
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <i
+            class="i-fe:github mr-16 cursor-pointer"
+            @click="handleLinkClick('https://github.com/HitFasonghao/IntelligentLuggageLockerManagementPlatform')"
+          />
+        </template>
+        后端仓库
+      </n-tooltip>
 
       <ThemeSetting class="mr-16" />
 

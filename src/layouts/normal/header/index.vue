@@ -13,14 +13,24 @@
 
       <Fullscreen />
 
-      <i
-        class="i-fe:github mr-16 cursor-pointer"
-        @click="handleLinkClick('https://github.com/zclzone/vue-naive-admin/tree/2.x')"
-      />
-      <i
-        class="i-me:gitee mr-16 cursor-pointer"
-        @click="handleLinkClick('https://gitee.com/isme-admin/vue-naive-admin/tree/2.x')"
-      />
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <i
+            class="i-fe:github mr-16 cursor-pointer"
+            @click="handleLinkClick('https://github.com/HitFasonghao/LockerManagementPlatform')"
+          />
+        </template>
+        前端仓库
+      </n-tooltip>
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <i
+            class="i-fe:github mr-16 cursor-pointer"
+            @click="handleLinkClick('https://github.com/HitFasonghao/IntelligentLuggageLockerManagementPlatform')"
+          />
+        </template>
+        后端仓库
+      </n-tooltip>
 
       <ThemeSetting class="mr-16" />
 

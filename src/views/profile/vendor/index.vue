@@ -2,11 +2,32 @@
   <AppPage show-footer>
     <n-card>
       <n-space align="center">
-        <n-avatar round :size="100" :src="adminInfo.avatar" />
+        <div class="relative">
+          <n-avatar round :size="100" :src="userInfo.avatar || undefined" />
+          <n-button
+            class="absolute bottom-0 right-0"
+            circle
+            size="small"
+            type="primary"
+            :loading="avatarUploading"
+            @click="triggerAvatarUpload"
+          >
+            <template #icon>
+              <i class="i-fe:camera" />
+            </template>
+          </n-button>
+          <input
+            ref="avatarInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleAvatarChange"
+          >
+        </div>
         <div class="ml-20">
           <div class="flex items-center text-16">
             <span>用户名:</span>
-            <span class="ml-12 opacity-80">{{ adminInfo.username }}</span>
+            <span class="ml-12 opacity-80">{{ userInfo.username }}</span>
           </div>
           <div class="mt-20 flex items-center text-16">
             <span>密码:</span>
@@ -16,16 +37,6 @@
               修改密码
             </n-button>
           </div>
-          <!--
-          <div class="mt-16 flex items-center">
-            <n-button type="primary" ghost @click="avatarModalRef.open()">
-              更改头像
-            </n-button>
-            <span class="ml-12 opacity-60">
-              修改头像只支持在线链接，不提供上传图片功能，如有需要可自行对接！
-            </span>
-          </div>
-          -->
         </div>
       </n-space>
     </n-card>
@@ -45,25 +56,25 @@
         bordered
       >
         <n-descriptions-item label="姓名">
-          {{ adminInfo.realName }}
+          {{ userInfo.realName }}
         </n-descriptions-item>
         <n-descriptions-item label="电话">
-          {{ adminInfo.phone }}
+          {{ userInfo.phone }}
         </n-descriptions-item>
         <n-descriptions-item label="邮箱">
-          {{ adminInfo.email }}
-        </n-descriptions-item>
-        <n-descriptions-item label="身份">
-          {{ isSuperAdmin.find((item) => item.value === adminInfo.isSuperAdmin)?.label ?? '未知' }}
+          {{ userInfo.email }}
         </n-descriptions-item>
         <n-descriptions-item label="账号状态">
-          {{ isAccountStatus.find((item) => item.value === adminInfo.isActive)?.label ?? '未知' }}
+          {{ statusMap[userInfo.status] ?? '未知' }}
+        </n-descriptions-item>
+        <n-descriptions-item label="最后修改密码时间">
+          {{ userInfo.passwordChangedTime }}
         </n-descriptions-item>
         <n-descriptions-item label="账号创建时间">
-          {{ adminInfo.createdTime }}
+          {{ userInfo.createdTime }}
         </n-descriptions-item>
         <n-descriptions-item label="最后更新时间">
-          {{ adminInfo.updatedTime }}
+          {{ userInfo.updatedTime }}
         </n-descriptions-item>
       </n-descriptions>
     </n-card>
@@ -93,7 +104,7 @@
                 type="primary"
                 size="small"
                 :loading="sendingCode"
-                :disabled="sendingCode || !adminInfo.phone"
+                :disabled="sendingCode || !userInfo.phone"
                 @click.stop="sendSmsCode"
               >
                 {{ sendingCode ? '发送中...' : '获取验证码' }}
@@ -125,28 +136,38 @@ import { MeModal } from '@/components'
 import { useForm, useModal } from '@/composables'
 import api from './api'
 
-const adminInfo = ref({
+const userInfo = ref({
   username: '',
   realName: '',
   phone: '',
   email: '',
-  isSuperAdmin: false,
-  isActive: false,
+  avatar: '',
+  status: '',
+  passwordChangedTime: '',
   createdTime: '',
   updatedTime: '',
 })
 const sendingCode = ref(false)
+const avatarUploading = ref(false)
+const avatarInputRef = ref(null)
 
-onMounted(async () => { // 页面加载时获取用户信息
+const statusMap = {
+  active: '正常',
+  locked: '锁定',
+  inactive: '未启用',
+}
+
+onMounted(async () => {
   try {
-    const { data } = await api.queryAdminInfo()
-    adminInfo.value = {
+    const { data } = await api.queryVendorUserInfo()
+    userInfo.value = {
       username: data.username || '',
       realName: data.realName || '',
       phone: data.phone || '',
       email: data.email || '',
-      isSuperAdmin: data.isSuperAdmin || false,
-      isActive: data.isActive || false,
+      avatar: data.avatar || '',
+      status: data.status || '',
+      passwordChangedTime: data.passwordChangedTime || '',
       createdTime: data.createdTime || '',
       updatedTime: data.updatedTime || '',
     }
@@ -156,6 +177,43 @@ onMounted(async () => { // 页面加载时获取用户信息
     $message.error('用户信息获取失败')
   }
 })
+
+/**
+ * 更换头像功能
+ */
+function triggerAvatarUpload() {
+  avatarInputRef.value?.click()
+}
+
+async function handleAvatarChange(e) {
+  const file = e.target.files?.[0]
+  if (!file)
+    return
+  if (!file.type.startsWith('image/')) {
+    $message.warning('请选择图片文件')
+    return
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    $message.warning('图片大小不能超过2MB')
+    return
+  }
+  try {
+    avatarUploading.value = true
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await api.updateAvatar(formData)
+    userInfo.value.avatar = data
+    $message.success('头像更换成功')
+  }
+  catch (error) {
+    console.error(error)
+    $message.error('头像更换失败')
+  }
+  finally {
+    avatarUploading.value = false
+    e.target.value = ''
+  }
+}
 
 /**
  * 修改密码功能
@@ -203,9 +261,9 @@ async function handlePwdSave() {
  */
 const [profileModalRef] = useModal()
 const [profileFormRef, profileForm, profileValidation, profileRules] = useForm({
-  username: adminInfo.value.username,
-  realName: adminInfo.value.realName,
-  email: adminInfo.value.email,
+  username: userInfo.value.username,
+  realName: userInfo.value.realName,
+  email: userInfo.value.email,
 })
 async function handleProfileSave() {
   await profileValidation()
@@ -215,24 +273,15 @@ async function handleProfileSave() {
   refreshUserInfo()
 }
 
-const isSuperAdmin = [
-  { label: '管理员', value: false },
-  { label: '超级管理员', value: true },
-]
-const isAccountStatus = [
-  { label: '禁用', value: false },
-  { label: '正常', value: true },
-]
-
 async function refreshUserInfo() {
-  const { data } = await api.queryAdminInfo()
-  adminInfo.value.username = data.username || ''
-  adminInfo.value.realName = data.realName || ''
-  adminInfo.value.email = data.email || ''
+  const { data } = await api.queryVendorUserInfo()
+  userInfo.value.username = data.username || ''
+  userInfo.value.realName = data.realName || ''
+  userInfo.value.email = data.email || ''
 }
 
 async function sendSmsCode() {
-  const { phone } = adminInfo.value
+  const { phone } = userInfo.value
   if (!phone || !/^1[3-9]\d{9}$/.test(phone))
     return $message.warning('请输入正确的手机号')
   try {
@@ -253,7 +302,6 @@ function convertEmptyStringToNull(obj) {
   const result = {}
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      // 将空字符串、仅包含空格的字符串转为null，其他值保持不变
       result[key] = (obj[key] === '' || (typeof obj[key] === 'string' && obj[key].trim() === ''))
         ? null
         : obj[key]

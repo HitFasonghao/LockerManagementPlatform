@@ -1,239 +1,65 @@
 <template>
   <AppPage show-footer>
     <div class="flex">
-      <!--
-      <n-card class="min-w-200 w-30%">
-        <div class="flex items-center">
-          <n-avatar round :size="60" :src="null" class="flex-shrink-0" />
-          <div class="ml-20 flex-col">
-            <span class="text-20 opacity-80">
-              Hello, 用户名或者昵称
-            </span>
-            <span class="mt-4 opacity-50">当前角色：用户身份</span>
-          </div>
-        </div>
-
-        <p class="mt-28 text-14 opacity-60">
-          一个人几乎可以在任何他怀有无限热忱的事情上成功。
-        </p>
-        <p class="mt-12 text-right text-12 opacity-40">
-          —— 查尔斯·史考伯
-        </p>
-      </n-card>
-      -->
-      <n-card class="ml-12 w-70%" title="✨ 欢迎使用 Vue Naive Admin 2.0">
-        <template #header-extra>
-          <a
-            class="text-highlight text-14 text-primary hover:underline hover:opacity-80"
-            href="https://isme.top"
-            target="_blank"
-          >
-            isme.top
-          </a>
-        </template>
-
+      <n-card class="w-full" title="智能行李寄存柜管理平台">
         <p class="opacity-60">
-          这是一款极简风格的后台管理模板，包含前后端解决方案，前端使用 Vite + Vue3 + Pinia +
-          Unocss，后端使用 Nestjs + TypeOrm +
-          MySql，简单易用，赏心悦目，历经十几次重构和细节打磨，诚意满满！！
+          智能行李寄存柜管理平台是一个面向寄存柜厂商与平台管理员的统一管理系统，支持厂商入驻审核、设备同步与管理、柜群管理、权限管控等核心功能，为行李寄存柜业务提供一站式管理方案。
         </p>
-        <footer class="mt-12 flex items-center justify-end">
-          <n-button
-            type="primary"
-            ghost
-            tag="a"
-            href="https://isme.top"
-            target="__blank"
-          >
-            开发文档
-          </n-button>
-          <n-button
-            type="primary"
-            class="ml-12"
-            tag="a"
-            href="https://github.com/zclzone/vue-naive-admin/tree/2.x"
-            target="__blank"
-          >
-            代码仓库
-          </n-button>
-        </footer>
       </n-card>
     </div>
-    <div class="mt-12 flex">
-      <n-card class="w-50%" title="💯 特性" segmented>
-        <template #header-extra>
-          <span class="text-highlight opacity-90">👏 历经十几次重构和细节打磨</span>
-        </template>
 
+    <div class="mt-12 flex">
+      <n-card class="w-50%" title="平台功能" segmented>
         <ul class="opacity-90">
           <li class="py-4">
-            🆒 使用
-            <b>Vue3</b>
-            主流技术栈:
-            <span class="text-highlight">Vite + Vue3 + Pinia</span>
+            <span class="text-highlight">厂商入驻审核</span>
+            ：支持厂商资质提交、多轮审核流程，确保接入厂商的合规性
           </li>
           <li class="py-4">
-            🍇 使用
-            <b>原子CSS</b>
-            框架:
-            <span class="text-highlight">Unocss</span>
-            ，优雅、轻量、易用
+            <span class="text-highlight">设备同步管理</span>
+            ：对接厂商系统接口，自动同步寄存柜设备信息至平台
           </li>
           <li class="py-4">
-            🤹 使用主流的
-            <span class="text-highlight">iconify + unocss</span>
-            图标方案，支持自定义图标，支持动态渲染
+            <span class="text-highlight">寄存柜种类管理</span>
+            ：灵活配置寄存柜种类及收费规则，支持多种计费时间单位
           </li>
           <li class="py-4">
-            🎨 使用 Naive UI，
-            <span class="text-highlight">极致简洁的代码风格和清爽的页面设计</span>
-            ，审美在线，主题轻松定制
+            <span class="text-highlight">柜群管理</span>
+            ：按地理位置组织寄存柜，管理柜群状态，查看柜群详情
           </li>
           <li class="py-4">
-            👏 先进且易于理解的文件结构设计，多个模块之间
-            <b>零耦合</b>
-            ，单个业务模块删除不影响其他模块
+            <span class="text-highlight">权限管控</span>
+            ：基于角色的权限管理，区分平台管理员与厂商用户，支持多厂商切换
           </li>
           <li class="py-4">
-            🚀
-            <span class="text-highlight">扁平化路由</span>
-            设计，每一个组件都可以是一个页面，告别多级路由 KeepAlive 难实现问题
-          </li>
-
-          <li class="py-4">
-            🍒
-            <span class="text-highlight">基于权限动态生成路由</span>
-            ，无需额外定义路由，
-            <span class="text-highlight">403和404可区分</span>
-            ，而不是无权限也跳404
-          </li>
-          <li class="py-4">
-            🔐 基于Redis集成
-            <span class="text-highlight">无感刷新</span>
-            ，用户登录态可控，安全与体验缺一不可
-          </li>
-          <li class="py-4">
-            ✨ 基于 Naive UI 封装
-            <span class="text-highlight">message</span>
-            全局工具方法，支持批量提醒，支持跨页面共享实例
-          </li>
-          <li class="py-4">
-            ⚡️ 基于 Naive UI 封装常用的业务组件，包含
-            <span class="text-highlight">Page</span>
-            组件、
-            <span class="text-highlight">CRUD</span>
-            表格组件及
-            <span class="text-highlight">Modal</span>
-            组件，减少大量重复性工作
+            <span class="text-highlight">厂商多角色</span>
+            ：厂商主管理员与普通用户权限隔离，主管理员可管理厂商下的用户
           </li>
         </ul>
-
-        <n-divider class="mb-0! mt-12!">
-          <p class="text-14 opacity-60">
-            👉点击
-            <b class="mx-2 transition hover:text-primary">
-              <a href="https://isme.top" target="_blank">更多</a>
-            </b>
-            查看更多实用功能，持续开发中...
-          </p>
-        </n-divider>
       </n-card>
 
-      <n-card class="ml-12 w-50%" title="🛠️ 技术栈" segmented>
-        <VChart :option="skillOption" autoresize />
+      <n-card class="ml-12 w-50%" title="技术栈" segmented>
+        <VChart :option="techOption" autoresize />
       </n-card>
     </div>
-
-    <n-card class="mt-12" title="⚡️ 趋势" segmented>
-      <div class="h-400">
-        <VChart :option="trendOption" autoresize />
-      </div>
-    </n-card>
   </AppPage>
 </template>
 
 <script setup>
-import { BarChart, LineChart, PieChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
-import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
-/*
-import { useUserStore } from '@/store'
-
-const userStore = useUserStore() */
 
 echarts.use([
   TooltipComponent,
-  GridComponent,
   LegendComponent,
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  UniversalTransition,
   PieChart,
+  CanvasRenderer,
 ])
 
-const trendOption = {
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'cross',
-      crossStyle: {
-        color: '#999',
-      },
-    },
-  },
-  legend: {
-    top: '5%',
-    data: ['star', 'fork'],
-  },
-  xAxis: [
-    {
-      type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      axisPointer: {
-        type: 'shadow',
-      },
-    },
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      min: 0,
-      max: 3000,
-      interval: 500,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-    {
-      type: 'value',
-      min: 0,
-      max: 500,
-      interval: 100,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-  ],
-  series: [
-    {
-      name: 'star',
-      type: 'line',
-      data: [200, 320, 520, 550, 600, 805, 888, 950, 1300, 2503, 2702, 2712],
-    },
-    {
-      name: 'fork',
-      yAxisIndex: 1,
-      type: 'bar',
-      data: [40, 72, 110, 115, 121, 175, 180, 201, 260, 398, 423, 455],
-    },
-  ],
-}
-
-const skillOption = {
+const techOption = {
   tooltip: {
     trigger: 'item',
     formatter({ name, value }) {
@@ -269,11 +95,13 @@ const skillOption = {
         show: false,
       },
       data: [
-        { value: 38.5, name: 'Vue' },
-        { value: 37.0, name: 'JavaScript' },
-        { value: 6.5, name: 'CSS' },
-        { value: 6.2, name: 'HTML' },
-        { value: 1.8, name: 'Other' },
+        { value: 30, name: 'Vue 3' },
+        { value: 30, name: 'Spring Boot' },
+        { value: 12, name: 'MyBatis Plus' },
+        { value: 10, name: 'MySQL' },
+        { value: 8, name: 'Redis' },
+        { value: 5, name: 'MinIO' },
+        { value: 5, name: 'Naive UI' },
       ],
     },
   ],

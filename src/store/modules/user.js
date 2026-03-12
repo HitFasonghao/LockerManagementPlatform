@@ -5,6 +5,9 @@ export const useAdminInfoStore = defineStore('adminInfo', {
     adminInfo: null,
   }),
   getters: {
+    avatar() {
+      return this.adminInfo?.avatar
+    },
     username() {
       return this.adminInfo?.username
     },
