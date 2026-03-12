@@ -95,14 +95,8 @@
           <n-form-item-gi label="API接口地址" path="apiEndpoint">
             <n-input v-model:value="formData.apiEndpoint" placeholder="请输入API接口地址" />
           </n-form-item-gi>
-          <n-form-item-gi label="API文档地址" path="apiDocumentUrl">
-            <n-input v-model:value="formData.apiDocumentUrl" placeholder="请输入API文档地址" />
-          </n-form-item-gi>
-          <n-form-item-gi label="回调地址" path="callbackUrl">
-            <n-input v-model:value="formData.callbackUrl" placeholder="请输入回调地址" />
-          </n-form-item-gi>
-          <n-form-item-gi label="API版本" path="apiVersion">
-            <n-input v-model:value="formData.apiVersion" placeholder="请输入API版本" />
+          <n-form-item-gi label="厂商系统访问Token" path="vendorAccessToken">
+            <n-input v-model:value="formData.vendorAccessToken" placeholder="请输入厂商系统访问Token" />
           </n-form-item-gi>
         </n-grid>
       </n-form>
@@ -157,9 +151,7 @@ function emptyForm() {
     introduction: '',
     businessScope: '',
     apiEndpoint: '',
-    apiDocumentUrl: '',
-    callbackUrl: '',
-    apiVersion: '',
+    vendorAccessToken: '',
   }
 }
 const formData = ref(emptyForm())
@@ -180,9 +172,7 @@ const formRules = {
   introduction: req('请输入公司介绍'),
   businessScope: req('请输入经营范围'),
   apiEndpoint: req('请输入API接口地址'),
-  apiDocumentUrl: req('请输入API文档地址'),
-  callbackUrl: req('请输入回调地址'),
-  apiVersion: req('请输入API版本'),
+  vendorAccessToken: req('请输入厂商系统访问Token'),
 }
 
 // 入驻申请页：显示 draft / pending / testing 状态的记录

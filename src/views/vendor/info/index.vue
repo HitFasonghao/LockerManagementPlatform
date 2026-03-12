@@ -1,15 +1,12 @@
 <template>
   <CommonPage>
-    <n-data-table :columns="columns" :data="qualifiedVendors" :loading="loading" :row-key="row => row.vendorId" />
+    <n-data-table :columns="columns" :data="vendorList" :loading="loading" :row-key="row => row.vendorId" />
 
     <!-- 查看厂商信息对话框 -->
     <n-modal v-model:show="detailVisible" preset="card" title="厂商资质信息" style="width: 800px;">
       <template v-if="currentVendor">
         <n-card title="基本信息" size="small">
           <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '120px' }">
-            <n-descriptions-item label="厂商编码">
-              {{ currentVendor.vendorCode || '-' }}
-            </n-descriptions-item>
             <n-descriptions-item label="公司全称">
               {{ currentVendor.companyName }}
             </n-descriptions-item>
@@ -54,14 +51,11 @@
             <n-descriptions-item label="API接口地址">
               {{ currentVendor.apiEndpoint || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="API文档地址">
-              {{ currentVendor.apiDocumentUrl || '-' }}
+            <n-descriptions-item label="厂商系统访问Token">
+              {{ currentVendor.vendorAccessToken || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="回调地址">
-              {{ currentVendor.callbackUrl || '-' }}
-            </n-descriptions-item>
-            <n-descriptions-item label="API版本">
-              {{ currentVendor.apiVersion || '-' }}
+            <n-descriptions-item label="平台访问Token">
+              {{ currentVendor.platformAccessToken || '-' }}
             </n-descriptions-item>
           </n-descriptions>
         </n-card>
@@ -94,7 +88,7 @@ import api from './api'
 defineOptions({ name: 'VendorInfo' })
 
 const loading = ref(false)
-const allVendors = ref([])
+const vendorList = ref([])
 const detailVisible = ref(false)
 const currentVendor = ref(null)
 
@@ -104,12 +98,7 @@ const statusMap = {
   banned: { label: '已禁用', type: 'error' },
 }
 
-const qualifiedVendors = computed(() =>
-  allVendors.value.filter(v => ['approved', 'suspended', 'banned'].includes(v.status)),
-)
-
 const columns = [
-  { title: '厂商编码', key: 'vendorCode', width: 140 },
   { title: '公司名称', key: 'companyName', ellipsis: { tooltip: true }, width: 200 },
   { title: '公司简称', key: 'shortName', width: 120 },
   {
@@ -140,13 +129,13 @@ const columns = [
   },
 ]
 
-onMounted(() => loadVendors())
+onMounted(() => loadVendorInfo())
 
-async function loadVendors() {
+async function loadVendorInfo() {
   loading.value = true
   try {
-    const { data } = await api.getMyVendors()
-    allVendors.value = data || []
+    const { data } = await api.getMyVendorInfo()
+    vendorList.value = data ? [data] : []
   }
   catch (error) {
     console.error(error)

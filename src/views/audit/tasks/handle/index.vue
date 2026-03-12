@@ -42,7 +42,9 @@
             {{ vendor.licenseNo || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="营业执照照片">
-            <n-image v-if="vendor.licenseImage" :src="vendor.licenseImage" width="120" />
+            <n-button v-if="vendor.licenseImage" size="small" @click="licenseVisible = true">
+              查看营业执照
+            </n-button>
             <span v-else>-</span>
           </n-descriptions-item>
           <n-descriptions-item label="法定代表人">
@@ -75,20 +77,14 @@
         </n-descriptions>
       </n-card>
 
-      <!-- 技术对接信息（技术测试节点时展示） -->
-      <n-card v-if="task.nodeType === 'api_test' || task.nodeType === 'performance'" class="mt-20" title="技术对接信息">
+      <!-- 技术对接信息（功能测试/性能测试节点时展示） -->
+      <n-card v-if="task.nodeType === 'functional_test' || task.nodeType === 'performance'" class="mt-20" title="技术对接信息">
         <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '140px' }">
           <n-descriptions-item label="API接口地址">
             {{ vendor.apiEndpoint || '-' }}
           </n-descriptions-item>
-          <n-descriptions-item label="API文档地址">
-            {{ vendor.apiDocumentUrl || '-' }}
-          </n-descriptions-item>
-          <n-descriptions-item label="回调地址">
-            {{ vendor.callbackUrl || '-' }}
-          </n-descriptions-item>
-          <n-descriptions-item label="API版本">
-            {{ vendor.apiVersion || '-' }}
+          <n-descriptions-item label="厂商系统访问Token">
+            {{ vendor.vendorAccessToken || '-' }}
           </n-descriptions-item>
         </n-descriptions>
       </n-card>
@@ -99,17 +95,17 @@
         <template v-if="task.nodeType === 'qualification'">
           <n-form label-placement="left" :label-width="100">
             <n-form-item label="审核结果">
-              <n-radio-group v-model:value="qualificationForm.auditResult">
-                <n-radio value="pass">
+              <n-radio-group v-model:value="auditForm.passed">
+                <n-radio :value="true">
                   通过
                 </n-radio>
-                <n-radio value="fail">
+                <n-radio :value="false">
                   不通过
                 </n-radio>
               </n-radio-group>
             </n-form-item>
             <n-form-item label="审核意见">
-              <n-input v-model:value="qualificationForm.auditNotes" type="textarea" :rows="3" placeholder="请输入审核意见" />
+              <n-input v-model:value="auditForm.notes" type="textarea" :rows="3" placeholder="请输入审核意见" />
             </n-form-item>
             <n-form-item>
               <n-button type="primary" :loading="submitting" @click="handleQualificationAudit">
@@ -119,28 +115,25 @@
           </n-form>
         </template>
 
-        <!-- API接口测试 -->
-        <template v-else-if="task.nodeType === 'api_test'">
-          <n-form label-placement="left" :label-width="120">
+        <!-- 功能测试 -->
+        <template v-else-if="task.nodeType === 'functional_test'">
+          <n-form label-placement="left" :label-width="100">
             <n-form-item label="测试结果">
-              <n-radio-group v-model:value="techTestForm.testResult">
-                <n-radio value="passed">
+              <n-radio-group v-model:value="auditForm.passed">
+                <n-radio :value="true">
                   通过
                 </n-radio>
-                <n-radio value="failed">
+                <n-radio :value="false">
                   未通过
                 </n-radio>
               </n-radio-group>
             </n-form-item>
             <n-form-item label="测试反馈">
-              <n-input v-model:value="techTestForm.testNotes" type="textarea" :rows="3" placeholder="请输入测试反馈" />
-            </n-form-item>
-            <n-form-item label="API检验结果">
-              <n-input v-model:value="techTestForm.apiValidationResultStr" type="textarea" :rows="2" placeholder="JSON格式（可选）" />
+              <n-input v-model:value="auditForm.notes" type="textarea" :rows="3" placeholder="请输入测试反馈" />
             </n-form-item>
             <n-form-item>
-              <n-button type="primary" :loading="submitting" @click="handleTechTestAudit">
-                提交API接口测试
+              <n-button type="primary" :loading="submitting" @click="handleFunctionalTestAudit">
+                提交功能测试
               </n-button>
             </n-form-item>
           </n-form>
@@ -148,22 +141,19 @@
 
         <!-- 性能测试 -->
         <template v-else-if="task.nodeType === 'performance'">
-          <n-form label-placement="left" :label-width="120">
+          <n-form label-placement="left" :label-width="100">
             <n-form-item label="测试结果">
-              <n-radio-group v-model:value="performanceForm.testResult">
-                <n-radio value="passed">
+              <n-radio-group v-model:value="auditForm.passed">
+                <n-radio :value="true">
                   通过
                 </n-radio>
-                <n-radio value="failed">
+                <n-radio :value="false">
                   未通过
                 </n-radio>
               </n-radio-group>
             </n-form-item>
             <n-form-item label="测试反馈">
-              <n-input v-model:value="performanceForm.testNotes" type="textarea" :rows="3" placeholder="请输入测试反馈" />
-            </n-form-item>
-            <n-form-item label="性能测试结果">
-              <n-input v-model:value="performanceForm.performanceResultStr" type="textarea" :rows="2" placeholder="JSON格式（可选）" />
+              <n-input v-model:value="auditForm.notes" type="textarea" :rows="3" placeholder="请输入测试反馈" />
             </n-form-item>
             <n-form-item>
               <n-button type="primary" :loading="submitting" @click="handlePerformanceTest">
@@ -208,6 +198,10 @@
       <n-card v-else class="mt-20" title="审核操作">
         <n-result status="success" title="该任务已完成" description="审核操作已提交，无需再次处理" />
       </n-card>
+      <!-- 营业执照弹窗 -->
+      <n-modal v-model:show="licenseVisible" preset="card" title="营业执照" style="width: 600px;">
+        <n-image :src="vendor.licenseImage" width="100%" />
+      </n-modal>
     </n-spin>
   </CommonPage>
 </template>
@@ -226,10 +220,9 @@ const loading = ref(false)
 const submitting = ref(false)
 const task = ref({})
 const vendor = ref({})
+const licenseVisible = ref(false)
 
-const qualificationForm = ref({ auditResult: null, auditNotes: '' })
-const techTestForm = ref({ testResult: null, testNotes: '', apiValidationResultStr: '' })
-const performanceForm = ref({ testResult: null, testNotes: '', performanceResultStr: '' })
+const auditForm = ref({ passed: null, notes: '' })
 const finalForm = ref({ approved: null, notes: '', effectiveFromTs: null, effectiveToTs: null })
 
 const taskStatusMap = {
@@ -269,13 +262,13 @@ async function loadData() {
 }
 
 async function handleQualificationAudit() {
-  if (!qualificationForm.value.auditResult) {
+  if (auditForm.value.passed === null) {
     $message.warning('请选择审核结果')
     return
   }
   submitting.value = true
   try {
-    await api.qualificationAudit(task.value.vendorId, qualificationForm.value)
+    await api.qualificationAudit(task.value.vendorId, auditForm.value)
     $message.success('资质审核提交成功')
     router.back()
   }
@@ -287,20 +280,15 @@ async function handleQualificationAudit() {
   }
 }
 
-async function handleTechTestAudit() {
-  if (!techTestForm.value.testResult) {
+async function handleFunctionalTestAudit() {
+  if (auditForm.value.passed === null) {
     $message.warning('请选择测试结果')
     return
   }
   submitting.value = true
   try {
-    const submitData = {
-      testResult: techTestForm.value.testResult,
-      testNotes: techTestForm.value.testNotes,
-      apiValidationResult: parseJsonSafe(techTestForm.value.apiValidationResultStr),
-    }
-    await api.techTestAudit(task.value.vendorId, submitData)
-    $message.success('技术测试审核提交成功')
+    await api.functionalTestAudit(task.value.vendorId, auditForm.value)
+    $message.success('功能测试审核提交成功')
     router.back()
   }
   catch (error) {
@@ -312,18 +300,13 @@ async function handleTechTestAudit() {
 }
 
 async function handlePerformanceTest() {
-  if (!performanceForm.value.testResult) {
+  if (auditForm.value.passed === null) {
     $message.warning('请选择测试结果')
     return
   }
   submitting.value = true
   try {
-    const submitData = {
-      testResult: performanceForm.value.testResult,
-      testNotes: performanceForm.value.testNotes,
-      performanceResult: parseJsonSafe(performanceForm.value.performanceResultStr),
-    }
-    await api.performanceTest(task.value.vendorId, submitData)
+    await api.performanceTest(task.value.vendorId, auditForm.value)
     $message.success('性能测试提交成功')
     router.back()
   }
@@ -357,17 +340,6 @@ async function handleFinalApproval() {
   }
   finally {
     submitting.value = false
-  }
-}
-
-function parseJsonSafe(str) {
-  if (!str || !str.trim())
-    return null
-  try {
-    return JSON.parse(str)
-  }
-  catch {
-    return str
   }
 }
 </script>

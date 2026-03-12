@@ -7,16 +7,51 @@
       </NButton>
     </template>
 
+    <!-- 查询条件 -->
+    <div class="mb-16 flex items-center gap-16">
+      <div class="flex items-center gap-6">
+        <span class="white-space-nowrap text-14">公司名称：</span>
+        <n-input
+          v-model:value="query.companyName"
+          placeholder="请输入"
+          clearable
+          style="width: 180px"
+          @clear="handleSearch"
+          @keyup.enter="handleSearch"
+        />
+      </div>
+      <NButton type="primary" @click="handleSearch">
+        <i class="i-fe:search mr-4 text-14" />
+        查询
+      </NButton>
+      <NButton @click="handleReset">
+        <i class="i-fe:rotate-ccw mr-4 text-14" />
+        重置
+      </NButton>
+    </div>
+
     <n-data-table :columns="columns" :data="vendorList" :loading="loading" :row-key="row => row.vendorId" :scroll-x="1200" />
+
+    <!-- 分页 -->
+    <div v-if="total > 0" class="mt-16 flex items-center justify-between">
+      <span class="text-13 opacity-60">共 {{ total }} 条数据</span>
+      <n-pagination
+        v-model:page="query.pageNum"
+        v-model:page-size="query.pageSize"
+        :item-count="total"
+        show-size-picker
+        show-quick-jumper
+        :page-sizes="[10, 20, 30]"
+        @update:page="loadData"
+        @update:page-size="handlePageSizeChange"
+      />
+    </div>
 
     <!-- 厂商详情对话框 -->
     <n-modal v-model:show="detailVisible" preset="card" title="厂商信息" style="width: 800px;">
       <template v-if="currentVendor">
         <n-card title="基本信息" size="small">
           <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '120px' }">
-            <n-descriptions-item label="厂商编码">
-              {{ currentVendor.vendorCode || '-' }}
-            </n-descriptions-item>
             <n-descriptions-item label="公司全称">
               {{ currentVendor.companyName }}
             </n-descriptions-item>
@@ -61,14 +96,11 @@
             <n-descriptions-item label="API接口地址">
               {{ currentVendor.apiEndpoint || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="API文档地址">
-              {{ currentVendor.apiDocumentUrl || '-' }}
+            <n-descriptions-item label="厂商系统访问Token">
+              {{ currentVendor.vendorAccessToken || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="回调地址">
-              {{ currentVendor.callbackUrl || '-' }}
-            </n-descriptions-item>
-            <n-descriptions-item label="API版本">
-              {{ currentVendor.apiVersion || '-' }}
+            <n-descriptions-item label="平台访问Token">
+              {{ currentVendor.platformAccessToken || '-' }}
             </n-descriptions-item>
           </n-descriptions>
         </n-card>
@@ -114,6 +146,12 @@ defineOptions({ name: 'VendorMgmtApproved' })
 
 const loading = ref(false)
 const vendorList = ref([])
+const total = ref(0)
+const query = ref({
+  companyName: '',
+  pageNum: 1,
+  pageSize: 10,
+})
 const detailVisible = ref(false)
 const currentVendor = ref(null)
 
@@ -168,8 +206,11 @@ onMounted(() => loadData())
 async function loadData() {
   loading.value = true
   try {
-    const { data } = await api.getApprovedVendors()
-    vendorList.value = data || []
+    const params = { ...query.value }
+    if (!params.companyName) delete params.companyName
+    const { data } = await api.getApprovedVendors(params)
+    vendorList.value = data?.list || []
+    total.value = data?.total || 0
   }
   catch (error) {
     console.error(error)
@@ -177,6 +218,22 @@ async function loadData() {
   finally {
     loading.value = false
   }
+}
+
+function handleSearch() {
+  query.value.pageNum = 1
+  loadData()
+}
+
+function handleReset() {
+  query.value = { companyName: '', pageNum: 1, pageSize: 10 }
+  loadData()
+}
+
+function handlePageSizeChange(size) {
+  query.value.pageSize = size
+  query.value.pageNum = 1
+  loadData()
 }
 
 async function handleView(row) {

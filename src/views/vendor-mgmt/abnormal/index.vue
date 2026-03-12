@@ -14,9 +14,6 @@
       <template v-if="currentVendor">
         <n-card title="基本信息" size="small">
           <n-descriptions label-placement="left" bordered :column="2" :label-style="{ width: '120px' }">
-            <n-descriptions-item label="厂商编码">
-              {{ currentVendor.vendorCode || '-' }}
-            </n-descriptions-item>
             <n-descriptions-item label="公司全称">
               {{ currentVendor.companyName }}
             </n-descriptions-item>
@@ -61,14 +58,11 @@
             <n-descriptions-item label="API接口地址">
               {{ currentVendor.apiEndpoint || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="API文档地址">
-              {{ currentVendor.apiDocumentUrl || '-' }}
+            <n-descriptions-item label="厂商系统访问Token">
+              {{ currentVendor.vendorAccessToken || '-' }}
             </n-descriptions-item>
-            <n-descriptions-item label="回调地址">
-              {{ currentVendor.callbackUrl || '-' }}
-            </n-descriptions-item>
-            <n-descriptions-item label="API版本">
-              {{ currentVendor.apiVersion || '-' }}
+            <n-descriptions-item label="平台访问Token">
+              {{ currentVendor.platformAccessToken || '-' }}
             </n-descriptions-item>
           </n-descriptions>
         </n-card>

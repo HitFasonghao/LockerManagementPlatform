@@ -20,7 +20,9 @@
             {{ vendor.licenseNo || '-' }}
           </n-descriptions-item>
           <n-descriptions-item label="营业执照照片">
-            <n-image v-if="vendor.licenseImage" :src="vendor.licenseImage" width="120" />
+            <NButton v-if="vendor.licenseImage" size="small" @click="licenseVisible = true">
+              查看营业执照
+            </NButton>
             <span v-else>-</span>
           </n-descriptions-item>
           <n-descriptions-item label="法定代表人">
@@ -59,14 +61,8 @@
           <n-descriptions-item label="API接口地址">
             {{ vendor.apiEndpoint || '-' }}
           </n-descriptions-item>
-          <n-descriptions-item label="API文档地址">
-            {{ vendor.apiDocumentUrl || '-' }}
-          </n-descriptions-item>
-          <n-descriptions-item label="回调地址">
-            {{ vendor.callbackUrl || '-' }}
-          </n-descriptions-item>
-          <n-descriptions-item label="API版本">
-            {{ vendor.apiVersion || '-' }}
+          <n-descriptions-item label="厂商系统访问Token">
+            {{ vendor.vendorAccessToken || '-' }}
           </n-descriptions-item>
         </n-descriptions>
       </n-card>
@@ -76,13 +72,15 @@
         <n-timeline>
           <n-timeline-item
             v-for="inst in progress.instances"
-            :key="inst.auditInstanceId"
+            :key="inst.auditTaskId"
             :type="getTimelineType(inst)"
             :title="inst.nodeName"
           >
             <div class="text-14 opacity-70">
-              <span v-if="inst.completedTime">已完成：{{ inst.completedTime }}</span>
-              <span v-else-if="inst.startedTime">进行中，开始于：{{ inst.startedTime }}</span>
+              <span v-if="inst.completedTime">
+                {{ inst.passed ? '通过' : '未通过' }}：{{ inst.completedTime }}
+              </span>
+              <span v-else-if="inst.auditTaskId">等待处理</span>
               <span v-else>等待中</span>
             </div>
           </n-timeline-item>
@@ -97,23 +95,42 @@
           :row-key="row => row.auditRecordId"
         />
       </n-card>
+      <!-- 营业执照弹窗 -->
+      <n-modal v-model:show="licenseVisible" preset="card" title="营业执照" style="width: 600px;">
+        <n-image :src="vendor.licenseImage" width="100%" />
+      </n-modal>
+      <!-- 审核任务详情弹窗 -->
+      <n-modal v-model:show="taskDialogVisible" preset="card" title="审核任务详情" style="width: 700px;">
+        <n-spin :show="taskLoading">
+          <n-data-table
+            :columns="taskColumns"
+            :data="taskList"
+            :row-key="row => row.auditTaskId"
+          />
+        </n-spin>
+      </n-modal>
     </n-spin>
   </CommonPage>
 </template>
 
 <script setup>
-import { NTag } from 'naive-ui'
+import { NButton, NTag } from 'naive-ui'
 import api from './api'
 
 defineOptions({ name: 'AuditReview' })
 
 const route = useRoute()
 const vendorId = computed(() => Number(route.params.id))
+const recordId = computed(() => route.query.recordId ? Number(route.query.recordId) : undefined)
 
 const loading = ref(false)
 const vendor = ref({})
 const progress = ref({})
 const auditRecords = ref([])
+const licenseVisible = ref(false)
+const taskDialogVisible = ref(false)
+const taskLoading = ref(false)
+const taskList = ref([])
 
 const statusMap = {
   draft: { label: '草稿', type: 'default' },
@@ -125,43 +142,61 @@ const statusMap = {
   banned: { label: '已禁用', type: 'error' },
 }
 
-const auditResultMap = { pass: '通过', fail: '不通过', pending: '待审核' }
-const testResultMap = { pending: '待测试', testing: '测试中', passed: '通过', failed: '未通过' }
-
 const recordColumns = [
   { title: '轮次', key: 'round', width: 70, align: 'center' },
   { title: '类型', key: 'type', width: 80 },
-  {
-    title: '资质审核结果',
-    key: 'auditResult',
-    width: 120,
-    render: row =>
-      h(NTag, {
-        type: { pass: 'success', fail: 'error', pending: 'warning' }[row.auditResult] ?? 'default',
-        size: 'small',
-      }, { default: () => auditResultMap[row.auditResult] || row.auditResult }),
-  },
-  { title: '审核意见', key: 'auditNotes', width: 200, ellipsis: { tooltip: true } },
-  {
-    title: '测试结果',
-    key: 'testResult',
-    width: 100,
-    render: row => row.testResult
-      ? h(NTag, {
-          type: { passed: 'success', failed: 'error', testing: 'info', pending: 'warning' }[row.testResult] ?? 'default',
-          size: 'small',
-        }, { default: () => testResultMap[row.testResult] || row.testResult })
-      : '-',
-  },
-  { title: '测试反馈', key: 'testNotes', width: 200, ellipsis: { tooltip: true } },
+  { title: '审核管理员', key: 'adminName', width: 120 },
   { title: '创建时间', key: 'createdTime', width: 170 },
+  { title: '完成时间', key: 'completedTime', width: 170 },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 100,
+    align: 'center',
+    render: row => h(
+      NButton,
+      { size: 'small', type: 'primary', secondary: true, onClick: () => handleViewTasks(row) },
+      { default: () => '查看任务' },
+    ),
+  },
+]
+
+const taskColumns = [
+  { title: '审核节点', key: 'nodeName', width: 120 },
+  { title: '审核管理员', key: 'adminName', width: 120 },
+  {
+    title: '结果',
+    key: 'passed',
+    width: 80,
+    align: 'center',
+    render: row => row.passed == null
+      ? '-'
+      : h(NTag, { type: row.passed ? 'success' : 'error', size: 'small' }, { default: () => row.passed ? '通过' : '未通过' }),
+  },
+  { title: '审核意见', key: 'notes', ellipsis: { tooltip: true } },
   { title: '完成时间', key: 'completedTime', width: 170 },
 ]
 
+async function handleViewTasks(record) {
+  taskDialogVisible.value = true
+  taskLoading.value = true
+  taskList.value = []
+  try {
+    const { data } = await api.getTasksByRecord(record.auditRecordId)
+    taskList.value = data || []
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    taskLoading.value = false
+  }
+}
+
 function getTimelineType(inst) {
   if (inst.completedTime)
-    return 'success'
-  if (inst.startedTime)
+    return inst.passed ? 'success' : 'error'
+  if (inst.auditTaskId)
     return 'info'
   return 'default'
 }
@@ -174,7 +209,7 @@ async function loadAll() {
   loading.value = true
   try {
     const [detailRes, recordsRes, progressRes] = await Promise.all([
-      api.getVendorDetail(vendorId.value),
+      api.getVendorDetail(vendorId.value, recordId.value),
       api.getAuditRecords(vendorId.value),
       api.getAuditProgress(vendorId.value),
     ])
