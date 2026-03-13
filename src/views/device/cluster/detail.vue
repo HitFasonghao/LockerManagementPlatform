@@ -54,6 +54,9 @@
               </NTag>
             </div>
             <div class="mb-6 text-13 opacity-70">
+              格口号：{{ item.number ?? '未设置' }}
+            </div>
+            <div class="mb-6 text-13 opacity-70">
               种类：{{ item.kindName || '未设置' }}
             </div>
             <!-- 右下角操作图标 -->
@@ -69,6 +72,20 @@
         <n-empty v-else description="该柜群暂无寄存柜" />
       </n-card>
     </n-spin>
+
+    <!-- 分配格口号弹窗 -->
+    <n-modal v-model:show="numberDialogVisible" preset="dialog" title="分配格口号" positive-text="确认" negative-text="取消" @positive-click="doAssignNumber">
+      <div class="mb-8 text-14">
+        寄存柜：{{ numberForm.deviceId }}
+      </div>
+      <n-input-number
+        v-model:value="numberForm.number"
+        placeholder="请输入格口号（留空则清除）"
+        :min="1"
+        clearable
+        style="width: 100%"
+      />
+    </n-modal>
   </CommonPage>
 </template>
 
@@ -113,7 +130,10 @@ function getActionOptions(item) {
     options.push({ label: '禁用', key: 'disable' })
   }
   else if (item.status === 'forbidden') {
-    options.push({ label: '启用', key: 'enable' })
+    options.push({ label: '分配格口号', key: 'assignNumber' })
+    if (item.number != null) {
+      options.push({ label: '启用', key: 'enable' })
+    }
     options.push({ label: '删除', key: 'delete' })
   }
   // opening / using 状态不显示禁用/启用
@@ -123,7 +143,15 @@ function getActionOptions(item) {
   return options
 }
 
+const numberDialogVisible = ref(false)
+const numberForm = ref({ cabinetId: null, number: null, deviceId: '' })
+
 function handleAction(key, item) {
+  if (key === 'assignNumber') {
+    numberForm.value = { cabinetId: item.cabinetId, number: item.number, deviceId: item.deviceId }
+    numberDialogVisible.value = true
+    return
+  }
   if (key === 'disable') {
     $dialog.warning({
       title: '确认禁用',
@@ -168,6 +196,18 @@ async function doRemoveCabinet(cabinetId) {
   try {
     await api.removeCabinet(cabinetId)
     $message.success('删除成功')
+    loadDetail()
+  }
+  catch (error) {
+    console.error(error)
+  }
+}
+
+async function doAssignNumber() {
+  try {
+    await api.assignNumber({ cabinetId: numberForm.value.cabinetId, number: numberForm.value.number || null })
+    $message.success('设置格口号成功')
+    numberDialogVisible.value = false
     loadDetail()
   }
   catch (error) {

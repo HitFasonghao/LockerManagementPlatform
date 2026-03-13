@@ -6,4 +6,5 @@ export default {
   detail: clusterId => request.get(`/cluster/detail/${clusterId}`),
   updateCabinetStatus: data => request.put('/cluster/cabinet/status', data),
   removeCabinet: cabinetId => request.delete(`/cluster/cabinet/${cabinetId}`),
+  assignNumber: data => request.put('/cluster/cabinet/number', data),
 }
