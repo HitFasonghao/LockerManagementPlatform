@@ -81,7 +81,7 @@
         :columns="columns"
         :data="vendorList"
         :row-key="row => row.auditRecordId"
-        :scroll-x="1300"
+        :scroll-x="1400"
       />
     </n-spin>
 
@@ -106,13 +106,13 @@
 import { NButton, NTag } from 'naive-ui'
 import api from './api'
 
+defineOptions({ name: 'AuditVendors' })
+
 function formatLocalDateTime(ts) {
   const d = new Date(ts)
   const pad = n => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
-
-defineOptions({ name: 'AuditVendors' })
 
 const router = useRouter()
 const loading = ref(false)
@@ -150,6 +150,7 @@ const columns = [
   { title: '简称', key: 'shortName', width: 100 },
   { title: '联系人', key: 'contactPerson', width: 100 },
   { title: '联系电话', key: 'contactPhone', width: 130 },
+  { title: '申请用户', key: 'vendorUserName', width: 100 },
   {
     title: '审核进度',
     key: 'result',
@@ -203,9 +204,12 @@ async function loadData() {
   loading.value = true
   try {
     const params = { ...query.value }
-    if (!params.companyName) delete params.companyName
-    if (!params.result) delete params.result
-    if (!params.round) delete params.round
+    if (!params.companyName)
+      delete params.companyName
+    if (!params.result)
+      delete params.result
+    if (!params.round)
+      delete params.round
 
     if (submitTimeRange.value) {
       params.submitTimeStart = formatLocalDateTime(submitTimeRange.value[0])

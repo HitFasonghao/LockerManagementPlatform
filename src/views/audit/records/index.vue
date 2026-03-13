@@ -104,13 +104,13 @@
 import { NButton, NTag } from 'naive-ui'
 import api from './api'
 
+defineOptions({ name: 'AuditRecords' })
+
 function formatLocalDateTime(ts) {
   const d = new Date(ts)
   const pad = n => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
-
-defineOptions({ name: 'AuditRecords' })
 
 const router = useRouter()
 const loading = ref(false)
@@ -163,7 +163,7 @@ const columns = [
             size: 'small',
             type: 'primary',
             secondary: true,
-            onClick: () => router.push(`/audit/review/${row.vendorId}`),
+            onClick: () => router.push({ path: `/audit/review/${row.vendorId}`, query: { recordId: row.auditRecordId } }),
           }, {
             default: () => '查看详情',
             icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),
@@ -182,10 +182,14 @@ async function loadRecords() {
   loading.value = true
   try {
     const params = { ...query.value }
-    if (!params.companyName) delete params.companyName
-    if (!params.round) delete params.round
-    if (!params.auditNodeId) delete params.auditNodeId
-    if (params.passed === null) delete params.passed
+    if (!params.companyName)
+      delete params.companyName
+    if (!params.round)
+      delete params.round
+    if (!params.auditNodeId)
+      delete params.auditNodeId
+    if (params.passed === null)
+      delete params.passed
 
     if (completedTimeRange.value) {
       params.completedTimeStart = formatLocalDateTime(completedTimeRange.value[0])

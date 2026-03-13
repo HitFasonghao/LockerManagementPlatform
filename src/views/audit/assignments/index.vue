@@ -12,7 +12,7 @@
         :columns="columns"
         :data="vendorList"
         :row-key="row => row.vendorId"
-        :scroll-x="1100"
+        :scroll-x="1200"
       />
     </n-spin>
 
@@ -90,6 +90,7 @@ const columns = [
   { title: '简称', key: 'shortName', width: 100 },
   { title: '联系人', key: 'contactPerson', width: 100 },
   { title: '联系电话', key: 'contactPhone', width: 130 },
+  { title: '申请用户', key: 'vendorUserName', width: 100 },
   {
     title: '状态',
     key: 'status',

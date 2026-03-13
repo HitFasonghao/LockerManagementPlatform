@@ -163,7 +163,7 @@ const columns = [
             size: 'small',
             type: 'primary',
             secondary: true,
-            onClick: () => router.push(`/audit/review/${row.vendorId}`),
+            onClick: () => router.push({ path: `/audit/review/${row.vendorId}`, query: { recordId: row.auditRecordId } }),
           }, {
             default: () => '审核详情',
             icon: () => h('i', { class: 'i-material-symbols:visibility-outline text-14' }),

@@ -33,13 +33,11 @@
 import { NButton, NTag } from 'naive-ui'
 import { MeModal } from '@/components'
 import { useForm, useModal } from '@/composables'
-import vendorApi from '../application/api'
 import api from './api'
 
 defineOptions({ name: 'VendorUsers' })
 
 const loading = ref(false)
-const vendorId = ref(null)
 const userList = ref([])
 
 const [addModalRef] = useModal()
@@ -57,7 +55,7 @@ const columns = [
     width: 100,
     render: row =>
       h(NTag, { type: row.isMain ? 'success' : 'default', size: 'small' }, {
-        default: () => row.isMain ? '主管理员' : '普通用户',
+        default: () => row.isMain ? '主管理员' : '普通管理员',
       }),
   },
   {
@@ -85,17 +83,14 @@ const columns = [
 ]
 
 onMounted(async () => {
-  await loadVendorInfo()
+  await loadUsers()
 })
 
-async function loadVendorInfo() {
+async function loadUsers() {
   loading.value = true
   try {
-    const { data } = await vendorApi.getMyVendorInfo()
-    if (data && data.vendorId) {
-      vendorId.value = data.vendorId
-      await loadUsers()
-    }
+    const { data } = await api.getVendorUsers()
+    userList.value = data || []
   }
   catch (error) {
     console.error(error)
@@ -105,13 +100,6 @@ async function loadVendorInfo() {
   }
 }
 
-async function loadUsers() {
-  if (!vendorId.value)
-    return
-  const { data } = await api.getVendorUsers(vendorId.value)
-  userList.value = data || []
-}
-
 function handleAdd() {
   addForm.value.username = ''
   addModalRef.value?.open()
@@ -119,7 +107,7 @@ function handleAdd() {
 
 async function handleAddSave() {
   await addValidation()
-  await api.addVendorUser(vendorId.value, addForm.value.username)
+  await api.addVendorUser(addForm.value.username)
   $message.success('添加成功')
   await loadUsers()
 }
@@ -131,7 +119,7 @@ function handleRemove(row) {
     positiveText: '确定',
     negativeText: '取消',
     async onPositiveClick() {
-      await api.removeVendorUser(vendorId.value, row.vendorUserId)
+      await api.removeVendorUser(row.vendorUserRelationId)
       $message.success('移除成功')
       await loadUsers()
     },

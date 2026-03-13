@@ -1,14 +1,14 @@
 <template>
   <footer class="f-c-c text-14 text-gray-500">
     <p>
-      Copyright © 2023
+      2026 毕设设计 by
       <a
-        href="https://github.com/zclzone"
+        href="https://github.com/HitFasonghao"
         target="__blank"
         class="transition"
         hover="decoration-underline color-primary"
       >
-        Ronnie Zhang(大脸怪)
+        Fasonghao
       </a>
     </p>
   </footer>

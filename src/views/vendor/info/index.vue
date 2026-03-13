@@ -134,8 +134,8 @@ onMounted(() => loadVendorInfo())
 async function loadVendorInfo() {
   loading.value = true
   try {
-    const { data } = await api.getMyVendorInfo()
-    vendorList.value = data ? [data] : []
+    const { data } = await api.getMyApprovedVendors()
+    vendorList.value = data || []
   }
   catch (error) {
     console.error(error)

@@ -6,4 +6,6 @@ export default {
   queryAdminInfo: () => request.get('/admin/queryUserInfo', { needToken: true }),
   sendSmsCode: data => request.post('/login/smsCode', data, { needToken: false }),
   updateAvatar: data => request.post('/admin/updateAvatar', data, { needToken: true, headers: { 'Content-Type': 'multipart/form-data' } }),
+  confirmOldPhone: data => request.post('/login/confirmOldPhone', data, { needToken: true }),
+  updatePhone: data => request.put('/login/updatePhone', data, { needToken: true }),
 }

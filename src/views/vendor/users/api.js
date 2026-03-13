@@ -1,7 +1,7 @@
 import { request } from '@/utils'
 
 export default {
-  getVendorUsers: vendorId => request.get(`/vendor/${vendorId}/users`),
-  addVendorUser: (vendorId, username) => request.post(`/vendor/${vendorId}/users`, null, { params: { username } }),
-  removeVendorUser: (vendorId, vendorUserId) => request.delete(`/vendor/${vendorId}/users/${vendorUserId}`),
+  getVendorUsers: () => request.get('/vendor/users'),
+  addVendorUser: username => request.post('/vendor/users', null, { params: { username } }),
+  removeVendorUser: vendorUserRelationId => request.delete(`/vendor/users/${vendorUserRelationId}`),
 }

@@ -208,11 +208,13 @@ onMounted(() => {
 async function loadAll() {
   loading.value = true
   try {
-    const [detailRes, recordsRes, progressRes] = await Promise.all([
+    const [detailRes, recordsRes] = await Promise.all([
       api.getVendorDetail(vendorId.value, recordId.value),
       api.getAuditRecords(vendorId.value),
-      api.getAuditProgress(vendorId.value),
     ])
+    // 审核进度需要recordId，优先用路由传入的，否则取最新记录的
+    const progressRecordId = recordId.value || recordsRes.data?.[0]?.auditRecordId
+    const progressRes = progressRecordId ? await api.getAuditProgress(progressRecordId) : { data: {} }
     vendor.value = detailRes.data || {}
     auditRecords.value = recordsRes.data || []
     progress.value = progressRes.data || {}

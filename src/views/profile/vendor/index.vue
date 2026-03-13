@@ -36,6 +36,12 @@
               <i class="i-fe:edit mr-4" />
               修改密码
             </n-button>
+            <span class="ml-48">手机号:</span>
+            <span class="ml-12 opacity-80">{{ userInfo.phone }}</span>
+            <n-button class="ml-32" type="primary" text @click="openPhoneModal()">
+              <i class="i-fe:phone mr-4" />
+              改绑手机号
+            </n-button>
           </div>
         </div>
       </n-space>
@@ -57,9 +63,6 @@
       >
         <n-descriptions-item label="姓名">
           {{ userInfo.realName }}
-        </n-descriptions-item>
-        <n-descriptions-item label="电话">
-          {{ userInfo.phone }}
         </n-descriptions-item>
         <n-descriptions-item label="邮箱">
           {{ userInfo.email }}
@@ -113,6 +116,71 @@
           </n-input>
         </n-form-item>
       </n-form>
+    </MeModal>
+
+    <MeModal ref="phoneModalRef" :title="phoneStep === 1 ? '验证当前手机号' : '绑定新手机号'" width="420px" @ok="handlePhoneSave">
+      <template v-if="phoneStep === 1">
+        <n-form label-placement="left" require-mark-placement="left">
+          <n-form-item label="当前手机号">
+            <n-input :value="userInfo.phone" disabled />
+          </n-form-item>
+          <n-form-item label="验证码" required>
+            <n-input
+              v-model:value="phoneForm.oldCode"
+              class="h-40 items-center"
+              placeholder="请输入验证码"
+              :maxlength="6"
+            >
+              <template #prefix>
+                <i class="i-fe:shield mr-12 opacity-20" />
+              </template>
+              <template #suffix>
+                <n-button
+                  text
+                  type="primary"
+                  size="small"
+                  :loading="sendingPhoneCode"
+                  :disabled="sendingPhoneCode || phoneCooldown > 0"
+                  @click.stop="sendPhoneCode(userInfo.phone)"
+                >
+                  {{ phoneCooldown > 0 ? `${phoneCooldown}s后重试` : (sendingPhoneCode ? '发送中...' : '获取验证码') }}
+                </n-button>
+              </template>
+            </n-input>
+          </n-form-item>
+        </n-form>
+      </template>
+      <template v-else>
+        <n-form label-placement="left" require-mark-placement="left">
+          <n-form-item label="新手机号">
+            <n-input v-model:value="phoneForm.newPhone" placeholder="请输入新手机号" :maxlength="11" />
+          </n-form-item>
+          <n-form-item label="验证码">
+            <n-input
+              v-model:value="phoneForm.newCode"
+              class="h-40 items-center"
+              placeholder="请输入验证码"
+              :maxlength="6"
+            >
+              <template #prefix>
+                <i class="i-fe:shield mr-12 opacity-20" />
+              </template>
+              <template #suffix>
+                <n-button
+                  text
+                  type="primary"
+                  size="small"
+                  :loading="sendingPhoneCode"
+                  :disabled="sendingPhoneCode || phoneCooldown > 0 || !phoneForm.newPhone"
+                  @click.stop="sendPhoneCode(phoneForm.newPhone)"
+                >
+                  {{ phoneCooldown > 0 ? `${phoneCooldown}s后重试` : (sendingPhoneCode ? '发送中...' : '获取验证码') }}
+                </n-button>
+              </template>
+            </n-input>
+          </n-form-item>
+        </n-form>
+      </template>
     </MeModal>
 
     <MeModal ref="profileModalRef" title="修改资料" width="420px" @ok="handleProfileSave()">
@@ -254,6 +322,108 @@ async function handlePwdSave() {
   updatePwdForm.code = pwdForm.value.code
   await api.updatePassword(updatePwdForm)
   $message.success('密码修改成功')
+}
+
+/**
+ * 改绑手机号功能
+ */
+const [phoneModalRef] = useModal()
+const phoneStep = ref(1)
+const sendingPhoneCode = ref(false)
+const phoneCooldown = ref(0)
+let phoneCooldownTimer = null
+const phoneForm = ref({
+  oldCode: '',
+  newPhone: '',
+  newCode: '',
+})
+
+function openPhoneModal() {
+  phoneStep.value = 1
+  phoneForm.value = { oldCode: '', newPhone: '', newCode: '' }
+  phoneCooldown.value = 0
+  if (phoneCooldownTimer) {
+    clearInterval(phoneCooldownTimer)
+    phoneCooldownTimer = null
+  }
+  phoneModalRef.value.open()
+}
+
+function startCooldown() {
+  phoneCooldown.value = 60
+  phoneCooldownTimer = setInterval(() => {
+    phoneCooldown.value--
+    if (phoneCooldown.value <= 0) {
+      clearInterval(phoneCooldownTimer)
+      phoneCooldownTimer = null
+    }
+  }, 1000)
+}
+
+async function sendPhoneCode(phone) {
+  if (!phone || !/^1[3-9]\d{9}$/.test(phone))
+    return $message.warning('请输入正确的手机号')
+  try {
+    sendingPhoneCode.value = true
+    await api.sendSmsCode({ phone, purpose: 'UPDATE_PHONE' })
+    $message.success('验证码发送成功')
+    startCooldown()
+  }
+  catch (error) {
+    console.error(error)
+    $message.error('验证码发送失败')
+  }
+  finally {
+    sendingPhoneCode.value = false
+  }
+}
+
+async function handlePhoneSave() {
+  if (phoneStep.value === 1) {
+    if (!phoneForm.value.oldCode || !/^\d{6}$/.test(phoneForm.value.oldCode)) {
+      $message.warning('请输入6位验证码')
+      return false
+    }
+    try {
+      await api.confirmOldPhone({ code: phoneForm.value.oldCode })
+      $message.success('验证成功，请输入新手机号')
+      phoneStep.value = 2
+      phoneCooldown.value = 0
+      if (phoneCooldownTimer) {
+        clearInterval(phoneCooldownTimer)
+        phoneCooldownTimer = null
+      }
+    }
+    catch (error) {
+      console.error(error)
+      $message.error('验证码错误')
+    }
+    return false
+  }
+  else {
+    if (!phoneForm.value.newPhone || !/^1[3-9]\d{9}$/.test(phoneForm.value.newPhone)) {
+      $message.warning('请输入正确的新手机号')
+      return false
+    }
+    if (!phoneForm.value.newCode || !/^\d{6}$/.test(phoneForm.value.newCode)) {
+      $message.warning('请输入6位验证码')
+      return false
+    }
+    try {
+      await api.updatePhone({
+        oldCode: phoneForm.value.oldCode,
+        newCode: phoneForm.value.newCode,
+        phone: phoneForm.value.newPhone,
+      })
+      $message.success('手机号修改成功')
+      userInfo.value.phone = phoneForm.value.newPhone
+    }
+    catch (error) {
+      console.error(error)
+      $message.error('手机号修改失败')
+      return false
+    }
+  }
 }
 
 /**
