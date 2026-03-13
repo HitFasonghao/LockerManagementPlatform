@@ -24,6 +24,7 @@ export const basePermissions = [
     enable: true,
     show: true,
     children: [
+      /*
       {
         code: 'ShowDocs',
         name: '项目文档',
@@ -33,12 +34,12 @@ export const basePermissions = [
         order: 1,
         enable: true,
         show: true,
-      },
+      }, */
       {
         code: 'ApiFoxDocs',
         name: '接口文档',
         type: 'MENU',
-        path: 'https://apifox.com/apidoc/shared-ff4a4d32-c0d1-4caf-b0ee-6abc130f734a',
+        path: 'https://s.apifox.cn/0f748006-7c39-47cb-ad32-9d0b4c6eb46a',
         icon: 'i-me:apifox',
         order: 2,
         enable: true,
